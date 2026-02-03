@@ -1,0 +1,1 @@
+FROM dancarvalhodev/php-alpine:8.5
