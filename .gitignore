@@ -7,5 +7,5 @@ logs/nginx/error.log
 
 www/vendor/*
 www/composer.lock
-www/config/*.env
+www/src/config/*.env
 
