@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\util\Routes;
+use DI\Bridge\Slim\Bridge;
 use DI\Container;
 use DI\ContainerBuilder;
 use Dotenv\Dotenv;
@@ -36,12 +38,7 @@ final class Main
      */
     public function run(): void
     {
-        # HERE ENTER ROUTE SYSTEM
-        $this->app->get('/', function (Request $request, Response $response, $args) {
-            $response->getBody()->write("Hello world!");
-            return $response;
-        });
-
+        Routes::register($this->app);
         $this->app->run();
     }
 
@@ -59,8 +56,16 @@ final class Main
      */
     private function buildContainer(): void
     {
-        $builder = new Container();
-        $this->container = $builder;
+        $builder = new ContainerBuilder();
+        $builder->useAttributes(true);
+        $builder->useAutowiring(true);
+
+        if (Common::isProduction()) {
+            $builder->enableCompilation(__DIR__ . '/cache');
+            $builder->writeProxiesToFile(true, __DIR__ . '/cache');
+        }
+
+        $this->container = $builder->build();
     }
 
     /**
@@ -68,7 +73,6 @@ final class Main
      */
     private function createApp(): void
     {
-        AppFactory::setContainer($this->container);
-        $this->app = AppFactory::create();
+        $this->app = Bridge::create($this->container);
     }
 }
