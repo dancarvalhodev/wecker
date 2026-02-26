@@ -1,8 +1,8 @@
 <?php
 
-namespace App;
+namespace App\Bootstrap;
 
-abstract class Common
+abstract class App
 {
     public static function isProduction(): bool
     {

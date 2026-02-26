@@ -1,19 +1,14 @@
 <?php
 
-namespace App;
+namespace App\Bootstrap;
 
-use App\util\Routes;
 use DI\Bridge\Slim\Bridge;
 use DI\Container;
 use DI\ContainerBuilder;
 use Dotenv\Dotenv;
 use Exception;
 use Slim\App;
-use Slim\Factory\AppFactory;
-use Slim\Psr7\Request;
-use Slim\Psr7\Response;
-
-# IMPROVE LEARNING ABOUT PHP DI AND HOW WORKS
+use App\Bootstrap\App as Application;
 final class Main
 {
     private Container $container;
@@ -31,6 +26,7 @@ final class Main
         $this->loadConfigs();
         $this->buildContainer();
         $this->createApp();
+        $this->registerRoutes();
     }
 
     /**
@@ -38,7 +34,6 @@ final class Main
      */
     public function run(): void
     {
-        Routes::register($this->app);
         $this->app->run();
     }
 
@@ -47,7 +42,7 @@ final class Main
      */
     private function loadConfigs(): void
     {
-        Dotenv::createImmutable(__DIR__ . '/config')->safeLoad();
+        Dotenv::createImmutable(dirname(__DIR__))->safeLoad();
     }
 
     /**
@@ -60,13 +55,13 @@ final class Main
         $builder->useAttributes(true);
         $builder->useAutowiring(true);
 
-        if (Common::isProduction()) {
-            $builder->enableCompilation(__DIR__ . '/cache');
-            $builder->writeProxiesToFile(true, __DIR__ . '/cache');
+        if (Application::isProduction()) {
+            $builder->enableCompilation(dirname(__DIR__) . '/storage/cache');
+            $builder->writeProxiesToFile(true, dirname(__DIR__) . '/storage/cache');
         }
 
         // Here I can add custom services, like database
-        $builder->addDefinitions(__DIR__ . '/util/infra/database.php');
+        $builder->addDefinitions(dirname(__DIR__) . '/config/database.php');
         $this->container = $builder->build();
     }
 
@@ -76,5 +71,13 @@ final class Main
     private function createApp(): void
     {
         $this->app = Bridge::create($this->container);
+    }
+
+    /**
+     * @return void
+     */
+    private function registerRoutes(): void
+    {
+        (require dirname(__DIR__) . '/routes/web.php')($this->app);
     }
 }

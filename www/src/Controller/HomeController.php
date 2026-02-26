@@ -1,8 +1,7 @@
 <?php
 
-namespace App\controller;
+namespace App\Controller;
 
-use App\controller\Default\AbstractController;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 

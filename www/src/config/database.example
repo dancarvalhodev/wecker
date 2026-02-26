@@ -1,6 +1,0 @@
-DB_USER="root"
-DB_PASSWORD="root"
-DB_PORT="5432"
-DB_NAME="wecker"
-DB_HOST="postgres"
-DB_DRIVER'="pdo_pgsql"
