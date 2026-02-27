@@ -60,7 +60,6 @@ final class Main
             $builder->writeProxiesToFile(true, dirname(__DIR__) . '/storage/cache');
         }
 
-        // Here I can add custom services, like database
         $builder->addDefinitions(dirname(__DIR__) . '/config/database.php');
         $this->container = $builder->build();
     }

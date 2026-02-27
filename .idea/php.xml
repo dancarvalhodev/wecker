@@ -65,6 +65,12 @@
       <path value="$PROJECT_DIR$/www/vendor/phpoption/phpoption" />
       <path value="$PROJECT_DIR$/www/vendor/twig/twig" />
       <path value="$PROJECT_DIR$/www/vendor/php-di/slim-bridge" />
+      <path value="$PROJECT_DIR$/www/vendor/psr/clock" />
+      <path value="$PROJECT_DIR$/www/vendor/symfony/translation" />
+      <path value="$PROJECT_DIR$/www/vendor/symfony/clock" />
+      <path value="$PROJECT_DIR$/www/vendor/symfony/translation-contracts" />
+      <path value="$PROJECT_DIR$/www/vendor/nesbot/carbon" />
+      <path value="$PROJECT_DIR$/www/vendor/carbonphp/carbon-doctrine-types" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.5" />

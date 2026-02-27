@@ -58,6 +58,12 @@
       <excludeFolder url="file://$MODULE_DIR$/www/vendor/vlucas/phpdotenv" />
       <excludeFolder url="file://$MODULE_DIR$/www/vendor/twig/twig" />
       <excludeFolder url="file://$MODULE_DIR$/www/vendor/php-di/slim-bridge" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/carbonphp/carbon-doctrine-types" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/nesbot/carbon" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/psr/clock" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/symfony/clock" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/symfony/translation" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/symfony/translation-contracts" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
