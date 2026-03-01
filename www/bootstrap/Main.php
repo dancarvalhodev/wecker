@@ -61,6 +61,7 @@ final class Main
         }
 
         $builder->addDefinitions(dirname(__DIR__) . '/config/database.php');
+        $builder->addDefinitions(dirname(__DIR__) . '/config/twig.php');
         $this->container = $builder->build();
     }
 

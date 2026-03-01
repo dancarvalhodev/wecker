@@ -3,9 +3,16 @@
 namespace App\Controller;
 
 use Psr\Http\Message\ResponseInterface;
+use Slim\Views\Twig;
 
 class AbstractController
 {
+    private Twig $twig;
+    public function __construct(Twig $twig)
+    {
+        $this->twig = $twig;
+    }
+
     /**
      * @param ResponseInterface $response
      * @param array $data
@@ -16,5 +23,15 @@ class AbstractController
     {
         $response->getBody()->write(json_encode($data));
         return $response->withHeader('Content-Type', 'application/json')->withStatus($statusCode);
+    }
+
+    protected function getTwig(): Twig
+    {
+        return $this->twig;
+    }
+
+    protected function setTwig(Twig $twig): void
+    {
+        $this->twig = $twig;
     }
 }
