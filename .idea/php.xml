@@ -73,6 +73,11 @@
       <path value="$PROJECT_DIR$/www/vendor/carbonphp/carbon-doctrine-types" />
       <path value="$PROJECT_DIR$/www/vendor/slim/twig-view" />
       <path value="$PROJECT_DIR$/www/vendor/symfony/polyfill-php81" />
+      <path value="$PROJECT_DIR$/www/vendor/symfony/polyfill-intl-normalizer" />
+      <path value="$PROJECT_DIR$/www/vendor/symfony/polyfill-intl-idn" />
+      <path value="$PROJECT_DIR$/www/vendor/respect/string-formatter" />
+      <path value="$PROJECT_DIR$/www/vendor/respect/stringifier" />
+      <path value="$PROJECT_DIR$/www/vendor/respect/validation" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.5" />

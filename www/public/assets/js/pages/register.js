@@ -3,8 +3,10 @@ const Register = (function () {
     const handleForm = () => {
         $('#register-form').submit(function (e){
             e.preventDefault();
-            validateRegisterForm($(this))
-            return
+            if(!validateRegisterForm($(this))) {
+                return;
+            }
+
             const formData = $(this).serialize();
 
             $.ajax({
@@ -15,7 +17,11 @@ const Register = (function () {
                     console.log('Success:', response);
                 },
                 error: function(xhr, status, error) {
-                    console.error('Error:', error);
+                    Swal.fire({
+                      icon: "error",
+                      title: "It`s a shame",
+                      text: 'A internal error occurred',
+                    });
                 }
             });
 
@@ -23,12 +29,44 @@ const Register = (function () {
     };
 
     function validateRegisterForm(data) {
+        let values = []
+        let emptyFields = [];
+
         let name = data.find('#name')
         let email = data.find('#email')
         let password = data.find('#password')
         let checkPassword = data.find('#check-password')
 
+        values.push({id: 'Name', element: name})
+        values.push({id: 'E-mail', element: email})
+        values.push({id: 'Password', element: password})
+        values.push({id: 'Confirm Password', element: checkPassword})
 
+        values.forEach(value => {
+            if (value.element.val().trim() === '') {
+                emptyFields.push(value.id);
+            }
+        });
+
+        if (emptyFields.length > 0) {
+            Swal.fire({
+              icon: "warning",
+              title: "Empty Value",
+              text: emptyFields.join(', ') + ` cannot be empty`,
+            });
+
+            return false;
+        }
+
+        if (password.val() !== checkPassword.val()) {
+            Swal.fire({
+              icon: "warning",
+              title: "Not equal password",
+              text: 'The password and confirm password must be equal.',
+            });
+        }
+
+        return true;
     }
 
     const init = () => {
@@ -38,5 +76,4 @@ const Register = (function () {
     return {
         init
     };
-
 })();
