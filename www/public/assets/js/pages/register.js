@@ -14,7 +14,21 @@ const Register = (function () {
                 type: 'POST',
                 data: formData,
                 success: function(response) {
-                    console.log('Success:', response);
+                    if (response.error) {
+                        const errorList = Object.values(response.messages)
+                            .map(message => `<li>${message}.</li>`)
+                            .join('');
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Ops! There are some validation errors.',
+                            html: `<ul style="text-align:left">${errorList}</ul>`
+                        });
+
+                        return
+                    }
+
+                    console.info(response)
                 },
                 error: function(xhr, status, error) {
                     Swal.fire({

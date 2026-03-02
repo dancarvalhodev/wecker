@@ -6,12 +6,11 @@ class FormNormalizer
 {
     public function clean(array $data): array
     {
-        $cleanedData = [];
+        $cleanedData = array_map(function ($value) {
+            return trim($value);
+        }, $data);
 
-        foreach ($data as $key => $value) {
-            $cleanedData[] = trim(strip_tags($value));
-        }
-
+        $cleanedData['email'] = mb_strtolower($cleanedData['email']);
         return $cleanedData;
     }
 }

@@ -29,11 +29,19 @@ class UserController extends AbstractController
      */
     public function register(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        if ($request->getMethod() === 'POST') {
+        if (mb_strtoupper($request->getMethod()) === 'POST') {
             $data = $request->getParsedBody();
             $data = $this->formNormalizer->clean($data);
-            $this->formValidator->validate($data);
+            $messages = $this->formValidator->validate($data);
 
+            if ($messages) {
+                return $this->returnWithJson($response, [
+                    'error' => true,
+                    'messages' => $messages
+                ]);
+            }
+
+            // Call model to persist user
             return $this->returnWithJson($response, ['name' => 'John Doe']);
         }
 
