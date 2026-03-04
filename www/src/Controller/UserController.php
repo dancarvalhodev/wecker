@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
+use App\Model\User\UserModel;
 use App\Service\User\Normalizer\FormNormalizer;
 use App\Service\User\Validator\FormValidator;
 use Psr\Http\Message\ResponseInterface;
@@ -13,13 +15,13 @@ use Twig\Error\SyntaxError;
 
 class UserController extends AbstractController
 {
-    private FormValidator $formValidator;
-    private FormNormalizer $formNormalizer;
-    public function __construct(Twig $twig, FormValidator $formValidator, FormNormalizer $formNormalizer)
+    /** @var UserModel $userModel */
+    private UserModel $userModel;
+
+    public function __construct(Twig $twig, UserModel $userModel)
     {
         parent::__construct($twig);
-        $this->formValidator = $formValidator;
-        $this->formNormalizer = $formNormalizer;
+        $this->userModel = $userModel;
     }
 
     /**
@@ -29,20 +31,21 @@ class UserController extends AbstractController
      */
     public function register(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        if (mb_strtoupper($request->getMethod()) === 'POST') {
+        if ($request->getMethod() === 'POST') {
             $data = $request->getParsedBody();
-            $data = $this->formNormalizer->clean($data);
-            $messages = $this->formValidator->validate($data);
+            $result = $this->userModel->createUser($data);
 
-            if ($messages) {
-                return $this->returnWithJson($response, [
-                    'error' => true,
-                    'messages' => $messages
+            if ($result['success']) {
+                return $this->returnWithJson($response->withStatus(201), [
+                    'success' => true,
+                    'messages' => null
                 ]);
             }
 
-            // Call model to persist user
-            return $this->returnWithJson($response, ['name' => 'John Doe']);
+            return $this->returnWithJson($response->withStatus(422), [
+                'success' => false,
+                'messages' => $result['messages']
+            ]);
         }
 
         return $this->getTwig()->render($response, 'crud/user/register.html.twig');

@@ -6,7 +6,7 @@ use Doctrine\DBAL\Connection;
 
 abstract class AbstractRepo
 {
-    private Connection $connection;
+    protected Connection $connection;
     public function __construct(Connection $connection)
     {
         $this->connection = $connection;

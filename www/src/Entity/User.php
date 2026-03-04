@@ -24,13 +24,14 @@ final class User
         string $name,
         string $email,
         string $password,
-        int $roleId,
-        Carbon $createdAt,
-        Carbon $updatedAt
+        int $roleId
     ) {
         $this->name = $name;
         $this->email = $email;
         $this->password = $password;
+        $this->roleId = $roleId;
+        $this->createdAt = new Carbon();
+        $this->updatedAt = new Carbon();
     }
 
     public function getId(): ?int

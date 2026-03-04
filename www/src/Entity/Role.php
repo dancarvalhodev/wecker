@@ -6,6 +6,8 @@ use Carbon\Carbon;
 
 final class Role
 {
+    const ROLE_ADMIN = 1;
+    const ROLE_USER = 2;
     private ?int $id;
 
     private string $name;
