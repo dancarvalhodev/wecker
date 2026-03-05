@@ -7,7 +7,7 @@ CREATE TABLE roles (
 
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(200) NOT NULL UNIQUE,
+    name VARCHAR(200) NOT NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role_id BIGINT NOT NULL,
@@ -18,3 +18,10 @@ CREATE TABLE users (
         REFERENCES roles(id)
         ON DELETE RESTRICT
 );
+
+INSERT INTO roles (id, name, type, created_at)
+VALUES (DEFAULT, 'ADMIN', 'ADMIN', DEFAULT);
+
+INSERT INTO roles (id, name, type, created_at)
+VALUES (DEFAULT, 'USER', 'USER', DEFAULT);
+

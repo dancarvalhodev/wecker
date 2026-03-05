@@ -2,8 +2,12 @@
 
 namespace App\Service\User\Normalizer;
 
-class FormNormalizer
+class GeneralNormalizer
 {
+    /**
+     * @param array $data
+     * @return array
+     */
     public function clean(array $data): array
     {
         $cleanedData = array_map(function ($value) {

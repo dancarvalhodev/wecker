@@ -3,7 +3,7 @@
 namespace App\Service\User\Validator;
 
 use Respect\Validation\ValidatorBuilder as v;
-class FormValidator
+class RegisterValidator
 {
     /**
      * @param array $data

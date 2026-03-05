@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Carbon\Carbon;
+use LogicException;
 
 final class User
 {
@@ -21,17 +22,31 @@ final class User
     private Carbon $updatedAt;
 
     public function __construct(
+        ?int   $id,
         string $name,
         string $email,
         string $password,
-        int $roleId
-    ) {
+        int    $roleId,
+        Carbon $createdAt = new Carbon(),
+        Carbon $updatedAt = new Carbon()
+    )
+    {
+        $this->id = $id;
         $this->name = $name;
         $this->email = $email;
         $this->password = $password;
         $this->roleId = $roleId;
-        $this->createdAt = new Carbon();
-        $this->updatedAt = new Carbon();
+        $this->createdAt = $createdAt;
+        $this->updatedAt = $updatedAt;
+    }
+
+    public function setId(int $id): void
+    {
+        if ($this->id !== null) {
+            throw new LogicException('ID already set');
+        }
+
+        $this->id = $id;
     }
 
     public function getId(): ?int

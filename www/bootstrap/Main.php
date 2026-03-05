@@ -2,6 +2,7 @@
 
 namespace App\Bootstrap;
 
+use App\Handler\HttpErrorHandler;
 use DI\Bridge\Slim\Bridge;
 use DI\Container;
 use DI\ContainerBuilder;
@@ -9,6 +10,7 @@ use Dotenv\Dotenv;
 use Exception;
 use Slim\App;
 use App\Bootstrap\App as Application;
+
 final class Main
 {
     private Container $container;
@@ -26,6 +28,7 @@ final class Main
         $this->loadConfigs();
         $this->buildContainer();
         $this->createApp();
+        $this->registerMiddlewares();
         $this->registerRoutes();
     }
 
@@ -62,6 +65,7 @@ final class Main
 
         $builder->addDefinitions(dirname(__DIR__) . '/config/database.php');
         $builder->addDefinitions(dirname(__DIR__) . '/config/twig.php');
+        $builder->addDefinitions(dirname(__DIR__) . '/config/handler.php');
         $this->container = $builder->build();
     }
 
@@ -79,5 +83,18 @@ final class Main
     private function registerRoutes(): void
     {
         (require dirname(__DIR__) . '/routes/web.php')($this->app);
+    }
+
+    private function registerMiddlewares(): void
+    {
+        $errorMiddleware = $this->app->addErrorMiddleware(
+            !Application::isProduction(), // displayErrorDetails
+            true, // logErrors
+            true  // logErrorDetails
+        );
+
+        $errorHandler = $this->container->get(HttpErrorHandler::class);
+
+        $errorMiddleware->setDefaultErrorHandler($errorHandler);
     }
 }

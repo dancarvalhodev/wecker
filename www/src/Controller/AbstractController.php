@@ -25,6 +25,19 @@ class AbstractController
         return $response->withHeader('Content-Type', 'application/json')->withStatus($statusCode);
     }
 
+    protected function returnWithSuccess(ResponseInterface $response)
+    {
+        $response = $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(200);
+
+        $response->getBody()->write(json_encode([
+            'success' => true
+        ]));
+
+        return $response;
+    }
+
     protected function getTwig(): Twig
     {
         return $this->twig;

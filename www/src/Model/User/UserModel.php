@@ -4,54 +4,56 @@ namespace App\Model\User;
 
 use App\Entity\Role;
 use App\Entity\User;
+use App\Exception\UserException;
+use App\Exception\ValidationException;
 use App\Repository\User\UserRepo;
-use App\Service\User\Normalizer\FormNormalizer;
-use App\Service\User\Validator\FormValidator;
+use Doctrine\DBAL\Exception;
 
 class UserModel
 {
-    /** @var FormValidator $formValidator */
-    private FormValidator $formValidator;
-
-    /** @var FormNormalizer $formNormalizer */
-    private FormNormalizer $formNormalizer;
-
     /** @var UserRepo $userRepo */
     private UserRepo $userRepo;
 
-    public function __construct(FormValidator $formValidator, FormNormalizer $formNormalizer, UserRepo $userRepo)
+    public function __construct(UserRepo $userRepo)
     {
-        $this->formValidator = $formValidator;
-        $this->formNormalizer = $formNormalizer;
         $this->userRepo = $userRepo;
     }
 
-    public function createUser(array $data): array
+    /**
+     * @param array $data
+     * @return User
+     * @throws Exception
+     */
+    public function createUser(array $data): User
     {
-        $data = $this->formNormalizer->clean($data);
-        $messages = $this->formValidator->validate($data);
-
-        if ($messages) {
-            return [
-                'success' => false,
-                'messages' => $messages
-            ];
-        }
-
         $user = new User(
+            null,
             $data['name'],
             $data['email'],
-            $data['password'],
+            password_hash($data['password'], PASSWORD_DEFAULT),
             Role::ROLE_USER,
         );
 
-        // Adjust password to generate hash
-        // Adjust timezone of image
-        // Sabe only H:i:s to datetimes
-        $this->userRepo->save($user);
+        $user = $this->userRepo->save($user);
 
-        return [
-            'success' => true
-        ];
+        return $user;
+    }
+
+    /**
+     * @param array $data
+     * @return User
+     * @throws Exception
+     * @throws UserException
+     * @throws ValidationException
+     */
+    public function authenticateUser(array $data): User
+    {
+        $user = $this->userRepo->findByEmail($data['email']);
+
+        if (!$user || !password_verify($data['password'], $user->getPassword())) {
+            throw new UserException(['Wrong password.']);
+        }
+
+        return $user;
     }
 }

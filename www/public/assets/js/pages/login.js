@@ -1,16 +1,17 @@
-const Register = (function () {
+const Login = (function () {
 
     const handleForm = () => {
-        $('#register-form').submit(function (e){
+        $('#login-form').submit(function (e){
             e.preventDefault();
-            if(!validateRegisterForm($(this))) {
+
+            if(!validateLoginForm($(this))) {
                 return;
             }
 
             const formData = $(this).serialize();
 
             $.ajax({
-                url: '/register',
+                url: '/login',
                 type: 'POST',
                 data: formData,
                 success: function(response) {
@@ -28,12 +29,6 @@ const Register = (function () {
                         return
                     }
 
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Nice',
-                        html: 'User registered successfully!'
-                    });
-
                     window.location.href = "/dashboard";
                 },
                 error: function() {
@@ -48,19 +43,15 @@ const Register = (function () {
         })
     };
 
-    function validateRegisterForm(data) {
+    function validateLoginForm(data) {
         let values = []
         let emptyFields = [];
 
-        let name = data.find('#name')
         let email = data.find('#email')
         let password = data.find('#password')
-        let checkPassword = data.find('#check-password')
 
-        values.push({id: 'Name', element: name})
         values.push({id: 'E-mail', element: email})
         values.push({id: 'Password', element: password})
-        values.push({id: 'Confirm Password', element: checkPassword})
 
         values.forEach(value => {
             if (value.element.val().trim() === '') {
@@ -76,14 +67,6 @@ const Register = (function () {
             });
 
             return false;
-        }
-
-        if (password.val() !== checkPassword.val()) {
-            Swal.fire({
-              icon: "warning",
-              title: "Not equal password",
-              text: 'The password and confirm password must be equal.',
-            });
         }
 
         return true;
