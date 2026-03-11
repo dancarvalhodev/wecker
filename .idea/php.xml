@@ -78,6 +78,10 @@
       <path value="$PROJECT_DIR$/www/vendor/respect/string-formatter" />
       <path value="$PROJECT_DIR$/www/vendor/respect/stringifier" />
       <path value="$PROJECT_DIR$/www/vendor/respect/validation" />
+      <path value="$PROJECT_DIR$/www/vendor/psr/http-client" />
+      <path value="$PROJECT_DIR$/www/vendor/guzzlehttp/psr7" />
+      <path value="$PROJECT_DIR$/www/vendor/guzzlehttp/promises" />
+      <path value="$PROJECT_DIR$/www/vendor/guzzlehttp/guzzle" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.5" />

@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Service\Api\DockerClient;
+use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Twig\Error\LoaderError;
@@ -14,9 +16,12 @@ class DashboardController extends AbstractController
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
      * @return ResponseInterface
+     * @throws GuzzleException
      */
     public function index(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        return $this->returnWithJson($response, ['name' => 'John Doe']);
+        $dockerClient = new DockerClient();
+
+        return $this->returnWithJson($response, ['dockerIs' => $dockerClient->ping()]);
     }
 }

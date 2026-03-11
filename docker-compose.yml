@@ -14,18 +14,16 @@ services:
         build:
             context: bin/php
         container_name: ${CONTAINER_NAME}php
-        depends_on:
-          - nginx
+        user: root
         volumes:
             - ./www:/usr/share/nginx/html
             - ./config/php/php.ini:/usr/local/etc/php/php.ini
+            - /var/run/docker.sock:/var/run/docker.sock
         restart: always
     redis:
         build:
             context: bin/redis
         container_name: ${CONTAINER_NAME}redis
-        depends_on:
-            - php
         restart: always
         volumes:
             - ./data/redis:/data
