@@ -1,7 +1,67 @@
 {% extends "/layout/base.html.twig" %}
 
 {% block content %}
-    <h1>Welcome to Wecker</h1>
-    <a href="/register">Register</a>
-    <a href="/login">Login</a>
+    <section class="py-5 text-center bg-white">
+        <div class="container">
+            <h1 class="display-5 fw-bold">Manage containers without the chaos</h1>
+            <p class="lead text-muted">
+                A simple and powerful interface inspired by Portainer to control your containers visually.
+            </p>
+
+            <div class="mt-4">
+                <a href="/register" class="btn btn-primary btn-lg me-2">Get Started</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5">
+        <div class="container">
+            <div class="row text-center g-4">
+
+                <div class="col-md-4">
+                    <div class="p-4 bg-white shadow-sm rounded">
+                        <h5>⚡ Fast Control</h5>
+                        <p class="text-muted">Start, stop and inspect containers instantly.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="p-4 bg-white shadow-sm rounded">
+                        <h5>📊 Clear Overview</h5>
+                        <p class="text-muted">Visualize your environment without digging through logs.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="p-4 bg-white shadow-sm rounded">
+                        <h5>🔒 Full Control</h5>
+                        <p class="text-muted">No black boxes. You stay in charge.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section class="pb-5">
+        <div class="container">
+            <div class="bg-dark text-white p-4 rounded shadow-sm">
+                <h6 class="text-uppercase text-muted">System Overview</h6>
+                <div class="d-flex justify-content-between mt-3">
+                    <div>
+                        <strong>Running</strong>
+                        <div class="fs-4">3</div>
+                    </div>
+                    <div>
+                        <strong>Stopped</strong>
+                        <div class="fs-4">1</div>
+                    </div>
+                    <div>
+                        <strong>Status</strong>
+                        <div class="fs-4 text-success">Healthy</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 {% endblock %}
