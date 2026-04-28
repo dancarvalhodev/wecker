@@ -4,6 +4,7 @@ namespace App\Service\Api;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use Psr\Http\Message\StreamInterface;
 use RuntimeException;
 use Throwable;
 
@@ -13,7 +14,7 @@ class DockerClient
     private ?Client $client;
 
     /** @var string */
-    private const string VERSION = 'v1.43';
+    private const string VERSION = 'v1.54';
 
     /** @var ?Client */
     private static ?Client $cached = null;
@@ -86,9 +87,34 @@ class DockerClient
     /**
      * @throws GuzzleException
      */
-    public function ping(): bool
+    public function getContainers(): array|null
     {
-        $res = $this->client->get('_ping');
-        return trim((string)$res->getBody()) === 'OK';
+        $res = $this->client->get('containers/json', [
+            'query' => [
+                'all' => true,
+            ],
+        ]);
+
+        return $res->getBody() ? json_decode($res->getBody()->getContents()) : null;
+    }
+
+    /**
+     * @throws GuzzleException
+     */
+    public function startContainer(string $id): int
+    {
+        $res = $this->client->post("containers/$id/start");
+
+        return $res->getStatusCode();
+    }
+
+    /**
+     * @throws GuzzleException
+     */
+    public function stopContainer(string $id): int
+    {
+        $res = $this->client->post("containers/$id/stop");
+
+        return $res->getStatusCode();
     }
 }

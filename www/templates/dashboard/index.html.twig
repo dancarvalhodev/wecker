@@ -1,0 +1,95 @@
+{% extends "/layout/base.html.twig" %}
+
+{% block content %}
+    <section class="py-4 bg-light">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-bold mb-0">Dashboard</h3>
+                <button disabled class="btn btn-primary">+ New Container</button>
+            </div>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="card shadow-sm text-center p-3">
+                        <h6 class="text-muted">Running</h6>
+                        <h2 class="text-success">{{ docker.running|default(0) }}</h2>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm text-center p-3">
+                        <h6 class="text-muted">Stopped</h6>
+                        <h2 class="text-danger">{{ docker.stopped|default(0) }}</h2>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm text-center p-3">
+                        <h6 class="text-muted">Total</h6>
+                        <h2>{{ docker.total|default(0) }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="mb-3">Containers</h5>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th>Image</th>
+                                <th>Ports</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% if docker.data is empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">
+                                        Nenhum container encontrado
+                                    </td>
+                                </tr>
+                            {% else %}
+                                {% for container in docker.data %}
+                                    <tr>
+                                        <td>{{ container.name }}</td>
+                                        <td>
+                                            {% set status = container.status %}
+                                            <span class="badge {{ status == 'running' ? 'bg-success' :
+                                            status == 'paused' ? 'bg-warning' :
+                                            status == 'restarting' ? 'bg-info' :
+                                            'bg-danger' }}">
+                                        {{ status }}
+                                        </span>
+                                        </td>
+                                        <td>{{ container.image }}</td>
+                                        <td>{{ container.ports|default('-') }}</td>
+                                        <td class="text-end">
+                                            {% if status == 'running' %}
+                                                <button data-id="{{ container.id }}" class="btn btn-sm btn-outline-danger stop-container">Stop</button>
+                                            {% else %}
+                                                <button data-id="{{ container.id }}" class="btn btn-sm btn-outline-success start-container">Start</button>
+                                            {% endif %}
+                                            <button data-id="{{ container.id }}" disabled class="btn btn-sm btn-outline-secondary">Logs</button>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+{% block scripts %}
+    {{ parent() }}
+    <script src="assets/js/pages/dashboard.js"></script>
+    <script>
+        $(document).ready(function () {
+            Dashboard.init();
+        });
+    </script>
+{% endblock %}
