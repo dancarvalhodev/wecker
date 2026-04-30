@@ -33,7 +33,7 @@
                 <div class="card-body">
                     <h5 class="mb-3">Containers</h5>
                     <div class="table-responsive">
-                        <table class="table align-middle">
+                        <table id="dashtable" class="table align-middle">
                             <thead>
                             <tr>
                                 <th>Name</th>
@@ -43,40 +43,7 @@
                                 <th class="text-end">Actions</th>
                             </tr>
                             </thead>
-                            <tbody>
-                            {% if docker.data is empty %}
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted">
-                                        Nenhum container encontrado
-                                    </td>
-                                </tr>
-                            {% else %}
-                                {% for container in docker.data %}
-                                    <tr>
-                                        <td>{{ container.name }}</td>
-                                        <td>
-                                            {% set status = container.status %}
-                                            <span class="badge {{ status == 'running' ? 'bg-success' :
-                                            status == 'paused' ? 'bg-warning' :
-                                            status == 'restarting' ? 'bg-info' :
-                                            'bg-danger' }}">
-                                        {{ status }}
-                                        </span>
-                                        </td>
-                                        <td>{{ container.image }}</td>
-                                        <td>{{ container.ports|default('-') }}</td>
-                                        <td class="text-end">
-                                            {% if status == 'running' %}
-                                                <button data-id="{{ container.id }}" class="btn btn-sm btn-outline-danger stop-container">Stop</button>
-                                            {% else %}
-                                                <button data-id="{{ container.id }}" class="btn btn-sm btn-outline-success start-container">Start</button>
-                                            {% endif %}
-                                            <button data-id="{{ container.id }}" disabled class="btn btn-sm btn-outline-secondary">Logs</button>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            {% endif %}
-                            </tbody>
+                            <tbody></tbody>
                         </table>
                     </div>
                 </div>

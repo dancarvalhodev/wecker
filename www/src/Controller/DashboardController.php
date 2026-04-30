@@ -38,16 +38,29 @@ class DashboardController extends AbstractController
      */
     public function index(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $data = $this->dashboardService->getDockerContainerData();
+        $data = $this->dashboardService->getDockerStats();
 
         return $this->getTwig()->render($response, 'dashboard/index.html.twig', [
             'docker' => [
                 'running' => $data['running'],
                 'stopped' => $data['stopped'],
-                'total' => $data['total'],
-                'data' => $data['data'],
+                'total' => $data['total']
             ]
         ]);
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @return ResponseInterface
+     * @throws DockerException
+     * @throws GuzzleException
+     */
+    public function list(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    {
+        $data = $this->dashboardService->getDockerContainerData();
+
+        return $this->returnWithJson($response, $data);
     }
 
     /**

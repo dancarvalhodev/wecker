@@ -17,6 +17,23 @@ class DashboardService
      * @throws DockerException
      * @throws GuzzleException
      */
+    public function getDockerStats(): array
+    {
+        $dockerClient = new DockerClient();
+        $containers = $dockerClient->getContainers();
+
+        if (!$containers) {
+            throw new DockerException(['Docker containers not found']);
+        }
+
+        return $this->processStats($containers);
+    }
+
+        /**
+     * @return array
+     * @throws DockerException
+     * @throws GuzzleException
+     */
     public function getDockerContainerData(): array
     {
         $dockerClient = new DockerClient();
@@ -82,9 +99,6 @@ class DashboardService
     private function processContainers(array $containers): array
     {
         $data = [];
-        $running = 0;
-        $stopped = 0;
-        $total = count($containers);
 
         foreach ($containers as $container) {
             $ports = null;
@@ -100,7 +114,24 @@ class DashboardService
                 'image' => $container->Image,
                 'ports' => $ports,
             ];
+        }
 
+        return [
+            'data' => $data,
+        ];
+    }
+
+        /**
+     * @param array $containers
+     * @return array
+     */
+    private function processStats(array $containers): array
+    {
+        $running = 0;
+        $stopped = 0;
+        $total = count($containers);
+
+        foreach ($containers as $container) {
             if ($container->State === self::RUNNING_STATE) {
                 $running++;
             }
@@ -113,8 +144,7 @@ class DashboardService
         return [
             'running' => $running,
             'stopped' => $stopped,
-            'total' => $total,
-            'data' => $data,
+            'total' => $total
         ];
     }
 }
