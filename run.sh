@@ -12,7 +12,7 @@ reset)
     echo "🗑️ Removendo containers parados"
     docker container prune -f
 
-    echo "🗑️ Removendo imagens dangling"
+    echo "🗑️ Removendo imagens"
     docker image prune -f
 
     echo "✔ Ambiente limpo"
@@ -46,33 +46,13 @@ setup)
     echo "✔ Setup concluído"
 ;;
 
-dev)
+up)
     echo "🚀 Ambiente de desenvolvimento"
-
-    docker compose --profile dev up -d --build
-
-    echo "✔ Containers rodando"
-    echo "🌐 http://localhost"
-;;
-
-build)
-    echo "🎨 Compilando Tailwind"
-
-    npm ci
-    npm run build
-
-    echo "✔ CSS compilado"
-;;
-
-prod)
-    echo "🏗️ Build de produção"
-
-    npm ci
-    npm run build
 
     docker compose up -d --build
 
-    echo "✔ Ambiente de produção rodando"
+    echo "✔ Containers rodando"
+    echo "🌐 http://localhost"
 ;;
 
 stop)
@@ -88,9 +68,7 @@ logs)
     echo ""
     echo "Uso:"
     echo "  ./run setup   -> prepara .env"
-    echo "  ./run dev     -> ambiente dev com Tailwind watcher"
-    echo "  ./run build   -> compila CSS"
-    echo "  ./run prod    -> build + produção"
+    echo "  ./run up     -> iniciar sistema"
     echo "  ./run stop    -> parar containers"
     echo "  ./run logs    -> ver logs"
     echo "  ./run reset    -> limpa o docker do projeto"

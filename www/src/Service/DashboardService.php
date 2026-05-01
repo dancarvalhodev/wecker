@@ -12,6 +12,8 @@ class DashboardService
     const string RUNNING_STATE = 'running';
     const array STOPPED_STATES = ['exited', 'created', 'dead'];
 
+    const SYSTEM_IMAGE_SUFIX = 'wecker';
+
     /**
      * @return array
      * @throws DockerException
@@ -29,7 +31,7 @@ class DashboardService
         return $this->processStats($containers);
     }
 
-        /**
+    /**
      * @return array
      * @throws DockerException
      * @throws GuzzleException
@@ -69,7 +71,7 @@ class DashboardService
         ];
     }
 
-        /**
+    /**
      * @param string $id
      * @return array
      * @throws GuzzleException
@@ -101,6 +103,10 @@ class DashboardService
         $data = [];
 
         foreach ($containers as $container) {
+            if (str_contains($container->Image, self::SYSTEM_IMAGE_SUFIX)) {
+                continue;
+            }
+
             $ports = null;
 
             if (isset($container->Ports[0]) && isset($container->Ports[1])) {
@@ -121,7 +127,7 @@ class DashboardService
         ];
     }
 
-        /**
+    /**
      * @param array $containers
      * @return array
      */
@@ -132,6 +138,11 @@ class DashboardService
         $total = count($containers);
 
         foreach ($containers as $container) {
+            if (str_contains($container->Image, self::SYSTEM_IMAGE_SUFIX)) {
+                $total--;
+                continue;
+            }
+
             if ($container->State === self::RUNNING_STATE) {
                 $running++;
             }
