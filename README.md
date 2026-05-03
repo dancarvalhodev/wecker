@@ -15,3 +15,7 @@ Pending to fix
 ~~7. Fix sample.sh copy bugs.~~
 8. Implement basic automatization tests.
 9. Implement BlockUI.
+
+Future
+1. Real time logs
+2. Web attach container console

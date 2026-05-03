@@ -53,7 +53,7 @@ const Dashboard = (function () {
 
                             return `
                                 ${button}
-                                <button data-id="${row.id}" disabled class="btn btn-sm btn-outline-secondary">Logs</button>
+                                <button data-id="${row.id}" class="btn btn-sm btn-outline-secondary log">Logs</button>
                             `;
                         }
                     }
@@ -73,6 +73,12 @@ const Dashboard = (function () {
                 let id = $(this).data('id');
                 startStopContainer(id, 'stop');
             });
+
+            $(document).on('click', '.log', function (e) {
+                e.preventDefault();
+                let id = $(this).data('id');
+                startStopContainer(id, 'log');
+            });
         };
 
         function startStopContainer(id, type) {
@@ -83,14 +89,14 @@ const Dashboard = (function () {
                     id: id,
                 },
                 success: function (response, textStatus, jqXHR) {
-                    let icon = 'error';
+                    let icon = defineIcon(jqXHR.status);
 
-                    if (jqXHR.status == 200) {
-                        icon = 'success';
-                    }
+                    if (type === 'log') {
+                        $('#logContent').text((response[0] && response[0] !== '') ? response[0] : 'arroz');
 
-                    if (jqXHR.status == 304) {
-                        icon = 'warning';
+                        const modal = new bootstrap.Modal(document.getElementById('logModal'));
+                        modal.show();
+                        return;
                     }
 
                     Swal.fire({
@@ -111,6 +117,18 @@ const Dashboard = (function () {
                     });
                 }
             });
+        }
+
+        function defineIcon(statusCode) {
+            if (statusCode === 200) {
+                return 'success';
+            }
+
+            if (statusCode === 304) {
+                return 'warning';
+            }
+
+            return 'error'
         }
 
         const init = () => {

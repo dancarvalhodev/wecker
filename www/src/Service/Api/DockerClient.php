@@ -117,4 +117,25 @@ class DockerClient
 
         return $res->getStatusCode();
     }
+
+    /**
+     * @throws GuzzleException
+     */
+    public function logs(string $id): array
+    {
+        $res = $this->client->get("containers/$id/logs", [
+            'query' => [
+                'stdout' => true,
+                'stderr' => true,
+                'tail' => 10,
+            ],
+        ]);
+
+        header('Content-Type: text/plain');
+
+        return [
+            'statusCode' => $res->getStatusCode(),
+            'body' => $res->getBody() ? $res->getBody()->getContents() : null,
+        ];
+    }
 }

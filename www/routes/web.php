@@ -18,4 +18,5 @@ return function (App $app): void {
     $app->post('/dashboard/start', [DashboardController::class, 'start'])->add(AuthMidleware::class);
     $app->post('/dashboard/stop', [DashboardController::class, 'stop'])->add(AuthMidleware::class);
     $app->post('/dashboard/list', [DashboardController::class, 'list'])->add(AuthMidleware::class);
+    $app->post('/dashboard/log', [DashboardController::class, 'log'])->add(AuthMidleware::class);
 };

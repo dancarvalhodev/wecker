@@ -95,6 +95,22 @@ class DashboardService
     }
 
     /**
+     * @param string $id
+     * @return array
+     * @throws GuzzleException
+     */
+    public function logs(string $id): array
+    {
+        $dockerClient = new DockerClient();
+        $logReturn = $dockerClient->logs($id);
+
+        return [
+            'status' => $logReturn['statusCode'],
+            'message' => $logReturn['body'],
+        ];
+    }
+
+    /**
      * @param array $containers
      * @return array
      */
