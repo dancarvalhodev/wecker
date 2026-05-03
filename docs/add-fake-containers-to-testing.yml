@@ -1,0 +1,94 @@
+version: "3.8"
+
+services:
+  c1:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c2:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c3:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c4:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c5:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c6:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c7:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c8:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c9:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c10:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c11:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c12:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c13:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c14:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c15:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c16:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c17:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c18:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c19:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c20:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c21:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c22:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
+
+  c23:
+    image: alpine
+    command: sh -c "while true; do sleep 3600; done"
