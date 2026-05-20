@@ -140,4 +140,26 @@ class DashboardController extends AbstractController
             return $this->returnWithJson($response, [$dockerResponse['message']], $dockerResponse['status']);
         }
     }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @return ResponseInterface
+     * @throws GuzzleException
+     * @throws ValidationException
+     */
+    public function create(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    {
+        if ($request->getMethod() === 'POST') {
+            $data = $request->getParsedBody();
+
+            if (!is_array($data)) {
+                throw new ValidationException(['Invalid request payload.']);
+            }
+
+            $dockerResponse = $this->dashboardService->create($data);
+
+            return $this->returnWithJson($response, [$dockerResponse['message']], $dockerResponse['status']);
+        }
+    }
 }

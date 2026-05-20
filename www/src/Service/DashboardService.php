@@ -125,7 +125,7 @@ class DashboardService
 
             $ports = null;
 
-            if (isset($container->Ports[0]) && isset($container->Ports[1])) {
+            if (isset($container->Ports[0]) && isset($container->Ports[1]) && isset($container->Ports[0]->PublicPort)) {
                 $ports = $container->Ports[0]->PublicPort . ':' . $container->Ports[1]->PrivatePort;
             }
 
