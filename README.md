@@ -1,6 +1,9 @@
 # Wecker
 **A simple and powerful interface inspired by Portainer to control your containers visually.**
 
+![img.png](docs/img2.png)
+![img.png](docs/img.png)
+
 Note: Requires Docker Desktop on Windows/macOS.
 
 # Setup Env
@@ -16,6 +19,8 @@ Note: Requires Docker Desktop on Windows/macOS.
 - Implement BlockUI
 
 # Future Implements
+- Health Status.
+- Docker installation info.
 - Web console to manage containers.
 - Log Operations (Start, Stop, Log).
 - Create containers.
