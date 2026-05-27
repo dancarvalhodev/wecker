@@ -5,9 +5,6 @@
         <div class="container">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h3 class="fw-bold mb-0">Dashboard</h3>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createContainerModel">
-                    + New Container
-                </button>
             </div>
             <div class="row g-3 mb-4">
                 <div class="col-md-4">
@@ -72,54 +69,11 @@
                 </div>
             </div>
         </div>
-
-        <div class="modal fade" id="createContainerModel" tabindex="-1" aria-labelledby="createContainerModel"
-             aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Create</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="container">
-                            <div class="row justify-content-center">
-                                <div class="col-xg-6 col-xg-12">
-                                    <div class="card shadow-xg">
-                                        <div class="card-body ">
-                                            <form id="create-form">
-                                                <div class="mb-3">
-                                                    <label for="name" class="form-label">Name</label>
-                                                    <input type="text" class="form-control" name="name" id="name">
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label for="image" class="form-label">Image</label>
-                                                    <input type="text" class="form-control" name="image" id="image">
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label for="port" class="form-label">Port</label>
-                                                    <input type="text" class="form-control" name="port" id="port">
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-success">Create</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
     </section>
 {% endblock %}
 {% block scripts %}
     {{ parent() }}
     <script src="assets/js/pages/dashboard.js"></script>
-    <script src="assets/js/pages/create.js"></script>
     <script>
         $(document).ready(function () {
             Dashboard.init();

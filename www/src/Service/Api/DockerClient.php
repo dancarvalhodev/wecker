@@ -4,7 +4,6 @@ namespace App\Service\Api;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use Psr\Http\Message\StreamInterface;
 use RuntimeException;
 use Throwable;
 

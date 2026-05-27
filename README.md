@@ -1,21 +1,23 @@
 # Wecker
+**A simple and powerful interface inspired by Portainer to control your containers visually.**
 
-**Come back in the future to use the product.**
+Note: Requires Docker Desktop on Windows/macOS.
 
+# Setup Env
+1. Install docker.
+    1. On windows you need to activate WSL2 and enable "Expose daemon on tcp://localhost:2375 without TLS" option.
+2. Run ./run.sh setup
+3. Run ./run.sh up
+4. Configure the postgresql database with user/login equals to root.
+5. Run database.sql script into database.
 
-Requires Docker Desktop on Windows/macOS.
+# Pending to Fix
+- Implement tests.
+- Implement BlockUI
 
-Pending to fix
-1. ~~Implement datatables~~
-~~2. Docker API connection with Linux and MacOS envs.~~ (Testing into Windows, macOS and Windows before v1)
-3. Make new containers, start, stop and logs actions to work.
-4. Make status and profile pages
-5. Fix the problem with postgresql persistence into docker structure.
-~~6. Refact run.sh removing old tailwind calls.~~
-~~7. Fix sample.sh copy bugs.~~
-8. Implement basic automatization tests.
-9. Implement BlockUI.
-
-Future
-1. Real time logs
-2. Web attach container console
+# Future Implements
+- Web console to manage containers.
+- Log Operations (Start, Stop, Log).
+- Create containers.
+- Real time docker logs.
+- Improve UI and UX.
