@@ -16,7 +16,8 @@ Note: Requires Docker Desktop on Windows/macOS.
 
 # Pending to Fix
 - Implement tests.
-- Implement BlockUI
+- Implement BlockUI.
+- Improve Documentation.
 
 # Future Implements
 - Health Status.
