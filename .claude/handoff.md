@@ -10,12 +10,16 @@ sessão atualiza este arquivo; quem começar lê este arquivo primeiro.
 - **Plano em execução:** `.claude/plans/v2.md` (19 etapas, branch `feature/v2`), executado com a
   skill `modo-codando` (`.claude/skills/modo-codando/SKILL.md`).
 - **Etapa 1 (skill `modo-codando` + este arquivo):** confirmada em 2026-10-20.
-- **Etapa 2 (ferramentas de qualidade):** entregue em 2026-10-20, aguardando conferência.
+- **Etapa 2 (ferramentas de qualidade):** confirmada em 2026-10-20.
   `docker compose exec php composer test | stan | cs | cs:fix` funcionam. Estado de partida:
   testes verdes (1 placeholder), `stan` com 39 erros (nível 6) e `cs` com 27 de 29 arquivos a
   corrigir. Os dois devem ser zerados nas etapas 7–10. Guzzle fixado em `^8.3` (estável), por
   decisão do dev. O `www/composer.lock` passou a ser versionado (saiu do `.gitignore`).
-- **Próxima:** etapa 3 — `run.sh` aprimorado.
+- **Etapa 3 (`run.sh` aprimorado → `justfile`):** entregue em 2026-10-20, aguardando
+  conferência. Por decisão do dev, o `run.sh` foi trocado por um `justfile` ([just](https://just.systems),
+  `sudo apt install just`). O `just` não aceita `:` em nomes: os comandos são `cs-fix`,
+  `db-reset` e `admin-create`. `migrate`, `db-reset`, `admin-create` e a parte do `install` que
+  migra/cria admin foram movidos para a etapa 4.
 
 ## Decisões da entrevista (2026-10-19)
 
@@ -46,11 +50,14 @@ O plano tem o detalhe; aqui só o resumo.
 - **CodeGraph primeiro** (`codegraph_explore`) para entender ou localizar código; `Read` só para o
   que o índice não cobre (Markdown, shell, JSON, Twig).
 - **Sem comandos compostos:** comandos pequenos, de propósito único, com caminhos absolutos.
-- **PHP roda no container:** `docker compose exec php ...` (ou `./run.sh ...` depois da etapa 3).
+- **PHP roda no container:** `docker compose exec php ...` (ou `just ...`, a partir da etapa 3).
 - **Git é do dev.** O Claude nunca roda `git add`, `commit`, `push`, `stash` nem abre PR. Quando
-  pedido, só escreve a mensagem de commit: em **inglês**, título + corpo, **sem** `:sparkles:` no
+  pedido, só escreve a mensagem de commit: em **inglês**, título + corpo **curto** (poucos tópicos, só o essencial), **sem** `:sparkles:` no
   início, terminando com `Co-Authored-By: <modelo atual> <noreply@anthropic.com>`.
 - **Apagar arquivos é com o dev:** o Claude lista `! rm ...` para ele rodar.
+- **Inglês em tudo que é do projeto:** código, UI, mensagens de commit e as mensagens/descrições
+  de ferramentas (`justfile`, scripts em `www/bin/`). Português só na documentação, nas specs e na
+  conversa.
 - O dev escreve em português; respostas em português.
 
 ## Pendências conhecidas

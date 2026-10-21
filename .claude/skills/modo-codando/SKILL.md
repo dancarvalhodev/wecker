@@ -74,8 +74,8 @@ anteriores.
   ruído em toda leitura seguinte.
 - **Verifique o que fez.** Rode o build, os testes ou o que a etapa permitir e leia o resultado.
   Numa alteração em PHP, rode os três: teste, análise estática e padrão de código. O PHP do
-  Wecker roda **dentro do container**, então use `./run.sh test`, `./run.sh stan` e
-  `./run.sh cs`; enquanto o `run.sh` ainda não tiver esses comandos, use
+  Wecker roda **dentro do container**, então use `just test`, `just stan` e
+  `just cs`; se o `justfile` ainda não tiver esses comandos, use
   `docker compose exec php composer test`, `... composer stan` e `... composer cs`. Rode cada um
   em um comando separado. Se os scripts ainda não existirem no `composer.json`, registre no
   relatório como "não verificado", não como falha. Uma recusa a um comando que juntava várias
@@ -99,8 +99,8 @@ anteriores.
   (`git status`, `git diff`, `git log`) e, quando o dev pedir, escrever o texto de uma mensagem
   de commit para ele usar. Nesse caso:
   - antes, confira o `git status` e avise se o staging não tiver tudo o que a etapa mudou;
-  - escreva em **inglês** (padrão deste projeto), com título e um corpo que explique o quê e o
-    porquê;
+  - escreva em **inglês** (padrão deste projeto), com título e um corpo **curto** — poucos
+    tópicos com o essencial do quê e do porquê, sem listar cada arquivo ou detalhe;
   - **não** comece com `:sparkles:`, porque a ferramenta do dev acrescenta sozinha;
   - termine com `Co-Authored-By: <nome do modelo atual> <noreply@anthropic.com>`, conferindo o
     nome do modelo no início da sessão.

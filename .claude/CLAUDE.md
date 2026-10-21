@@ -8,29 +8,32 @@ Wecker is a Portainer-inspired web UI for managing Docker containers. A PHP (Sli
 
 ## Commands
 
-All infra commands run through the `run.sh` wrapper (from repo root):
+All commands run through the `justfile` ([just](https://just.systems), from repo root). `just` with no args lists them:
 
 ```bash
-./run.sh setup   # copy env-example -> .env and www/env-example -> www/.env (run once)
-./run.sh up      # docker compose up -d --build; app served at http://localhost
-./run.sh stop    # docker compose down
-./run.sh logs    # tail all container logs
-./run.sh reset   # down -v + prune project containers/images
-./run.sh nuke    # down -v + docker system prune -af --volumes (destroys ALL docker state)
+just install          # first run: setup + up + composer install
+just setup            # copy env-example -> .env and www/env-example -> www/.env
+just up               # docker compose up -d --build; app served at http://localhost
+just stop | status | logs
+just shell [service]  # sh inside a container (default: php)
+just reset            # down -v + prune project containers/images
+just nuke             # docker system prune -af --volumes (destroys ALL docker state; typed confirmation)
 ```
 
 First-run bootstrap also requires loading `docs/database.sql` into the postgres db (creates `roles`/`users`, seeds `admin@admin.com`). See README for the full sequence.
 
-Composer / tests run **inside the php container** (php 8.5, Alpine):
+Composer / tests run **inside the php container** (php 8.5, Alpine); the recipes wrap `docker compose exec php composer ...`:
 
 ```bash
-docker compose exec php composer install               # deps land in www/vendor
-docker compose exec php ./vendor/bin/phpunit           # run all tests
-docker compose exec php ./vendor/bin/phpunit tests/Integration/TempTest.php   # single file
-docker compose exec php ./vendor/bin/phpunit --filter testUnitIsWorking       # single test
+just composer <args>        # any composer command
+just test                   # all tests (phpunit.xml: Unit + Integration suites)
+just test testUnitIsWorking # single test (--filter)
+just stan                   # PHPStan (level 6, phpstan.neon)
+just cs                     # PHP-CS-Fixer check, PER-CS 2.0 (.php-cs-fixer.dist.php)
+just cs-fix                 # apply PHP-CS-Fixer fixes
 ```
 
-Note: there is no committed `phpunit.xml` — the test suite is currently a placeholder (`www/tests/Integration/TempTest.php`). The IDE points PHPUnit at `www/tests`.
+Note: the test suite is currently a placeholder (`www/tests/Integration/TempTest.php`; `tests/Unit` is empty).
 
 ## Detailed guidance
 
