@@ -7,7 +7,6 @@ logs/nginx/access.log
 logs/nginx/error.log
 
 www/vendor/*
-www/composer.lock
 www/storage
 www/.env
 

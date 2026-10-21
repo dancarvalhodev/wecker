@@ -9,11 +9,13 @@ sessão atualiza este arquivo; quem começar lê este arquivo primeiro.
 
 - **Plano em execução:** `.claude/plans/v2.md` (19 etapas, branch `feature/v2`), executado com a
   skill `modo-codando` (`.claude/skills/modo-codando/SKILL.md`).
-- **Etapa 1 (skill `modo-codando` + este arquivo):** entregue em 2026-10-20, aguardando
-  conferência do dev.
-- **Próxima:** etapa 2 — ferramentas de qualidade (`phpunit.xml`, PHPStan, PHP-CS-Fixer, scripts
-  `composer test | stan | cs | cs:fix`). Até ela, não há como rodar `test`/`stan`/`cs`: relatar
-  como "não verificado".
+- **Etapa 1 (skill `modo-codando` + este arquivo):** confirmada em 2026-10-20.
+- **Etapa 2 (ferramentas de qualidade):** entregue em 2026-10-20, aguardando conferência.
+  `docker compose exec php composer test | stan | cs | cs:fix` funcionam. Estado de partida:
+  testes verdes (1 placeholder), `stan` com 39 erros (nível 6) e `cs` com 27 de 29 arquivos a
+  corrigir. Os dois devem ser zerados nas etapas 7–10. Guzzle fixado em `^8.3` (estável), por
+  decisão do dev. O `www/composer.lock` passou a ser versionado (saiu do `.gitignore`).
+- **Próxima:** etapa 3 — `run.sh` aprimorado.
 
 ## Decisões da entrevista (2026-10-19)
 

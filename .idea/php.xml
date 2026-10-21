@@ -82,6 +82,34 @@
       <path value="$PROJECT_DIR$/www/vendor/guzzlehttp/psr7" />
       <path value="$PROJECT_DIR$/www/vendor/guzzlehttp/promises" />
       <path value="$PROJECT_DIR$/www/vendor/guzzlehttp/guzzle" />
+      <path value="$PROJECT_DIR$/www/vendor/symfony/polyfill-intl-grapheme" />
+      <path value="$PROJECT_DIR$/www/vendor/symfony/event-dispatcher-contracts" />
+      <path value="$PROJECT_DIR$/www/vendor/symfony/stopwatch" />
+      <path value="$PROJECT_DIR$/www/vendor/ergebnis/agent-detector" />
+      <path value="$PROJECT_DIR$/www/vendor/evenement/evenement" />
+      <path value="$PROJECT_DIR$/www/vendor/friendsofphp/php-cs-fixer" />
+      <path value="$PROJECT_DIR$/www/vendor/psr/event-dispatcher" />
+      <path value="$PROJECT_DIR$/www/vendor/clue/ndjson-react" />
+      <path value="$PROJECT_DIR$/www/vendor/fidry/cpu-core-counter" />
+      <path value="$PROJECT_DIR$/www/vendor/react/cache" />
+      <path value="$PROJECT_DIR$/www/vendor/react/child-process" />
+      <path value="$PROJECT_DIR$/www/vendor/react/stream" />
+      <path value="$PROJECT_DIR$/www/vendor/react/dns" />
+      <path value="$PROJECT_DIR$/www/vendor/react/promise" />
+      <path value="$PROJECT_DIR$/www/vendor/react/socket" />
+      <path value="$PROJECT_DIR$/www/vendor/react/event-loop" />
+      <path value="$PROJECT_DIR$/www/vendor/phpstan/phpstan" />
+      <path value="$PROJECT_DIR$/www/vendor/symfony/console" />
+      <path value="$PROJECT_DIR$/www/vendor/symfony/process" />
+      <path value="$PROJECT_DIR$/www/vendor/symfony/string" />
+      <path value="$PROJECT_DIR$/www/vendor/symfony/service-contracts" />
+      <path value="$PROJECT_DIR$/www/vendor/symfony/options-resolver" />
+      <path value="$PROJECT_DIR$/www/vendor/symfony/polyfill-php82" />
+      <path value="$PROJECT_DIR$/www/vendor/symfony/polyfill-php84" />
+      <path value="$PROJECT_DIR$/www/vendor/symfony/polyfill-php85" />
+      <path value="$PROJECT_DIR$/www/vendor/symfony/filesystem" />
+      <path value="$PROJECT_DIR$/www/vendor/symfony/finder" />
+      <path value="$PROJECT_DIR$/www/vendor/symfony/event-dispatcher" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.5" />

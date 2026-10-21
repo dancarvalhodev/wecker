@@ -75,6 +75,34 @@
       <excludeFolder url="file://$MODULE_DIR$/www/vendor/guzzlehttp/promises" />
       <excludeFolder url="file://$MODULE_DIR$/www/vendor/guzzlehttp/psr7" />
       <excludeFolder url="file://$MODULE_DIR$/www/vendor/psr/http-client" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/clue/ndjson-react" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/ergebnis/agent-detector" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/evenement/evenement" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/fidry/cpu-core-counter" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/friendsofphp/php-cs-fixer" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/phpstan/phpstan" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/psr/event-dispatcher" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/react/cache" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/react/child-process" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/react/dns" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/react/event-loop" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/react/promise" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/react/socket" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/react/stream" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/symfony/console" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/symfony/event-dispatcher" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/symfony/event-dispatcher-contracts" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/symfony/filesystem" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/symfony/finder" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/symfony/options-resolver" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/symfony/polyfill-intl-grapheme" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/symfony/polyfill-php82" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/symfony/polyfill-php84" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/symfony/polyfill-php85" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/symfony/process" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/symfony/service-contracts" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/symfony/stopwatch" />
+      <excludeFolder url="file://$MODULE_DIR$/www/vendor/symfony/string" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
