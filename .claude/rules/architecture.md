@@ -10,14 +10,16 @@ public/index.php → Bootstrap\Main → routes/web.php → Controller → Servic
 ## Bootstrap
 
 - `www/public/index.php` — entrypoint. Starts the PHP session (`session_start()`), requires the Composer autoloader, and runs `new Main()->run()`.
-- `App\Bootstrap\Main` (`www/bootstrap/Main.php`) — orchestrates startup in the constructor: `loadConfigs()` (vlucas/phpdotenv `safeLoad` of `www/.env`), `buildContainer()`, `createApp()` (via `php-di/slim-bridge` `Bridge::create`), `registerMiddlewares()`, `registerRoutes()`.
+- `App\Bootstrap\Main` (`www/bootstrap/Main.php`) — orchestrates startup in the constructor: `loadConfigs()` (vlucas/phpdotenv `safeLoad` of `www/.env`), `buildContainer()` (delegates to `ContainerFactory::create()`), `createApp()` (via `php-di/slim-bridge` `Bridge::create`), `registerMiddlewares()`, `registerRoutes()`.
+- `App\Bootstrap\ContainerFactory` — builds the PHP-DI container; shared by the web entrypoint and the CLI scripts.
+- `www/bin/*.php` — CLI entrypoints (`migrate.php`, `admin-create.php`). `bin/bootstrap.php` loads the autoloader and `.env` and returns the container; the scripts only parse arguments, call a class from `src/` and print through `App\Console\Terminal`. Keep logic out of `bin/`.
 - `App\Bootstrap\App` (`www/bootstrap/App.php`) — static env gates `isProduction()/isTesting()/isDevelopment()` keyed off `getenv('APP_ENV')`. Production enables DI compilation and proxy caching under `www/storage/cache`; Twig cache is likewise only enabled in production.
 
 ## Dependency injection
 
 - Container built by `DI\ContainerBuilder` with **attributes and autowiring enabled** — controllers/services/repos get their constructor dependencies resolved automatically; you rarely need to register a class explicitly.
 - Explicit definitions live in `www/config/*.php`, each returning a `[Class => factory]` array and loaded via `addDefinitions()`:
-  - `config/database.php` — builds the Doctrine DBAL `Connection` from `DB_*` env vars (`pdo_pgsql`).
+  - `config/database.php` — the app's Doctrine DBAL `Connection`, created by `App\Database\ConnectionFactory` from the `DB_*` env vars (`pdo_pgsql`).
   - `config/twig.php` — builds `Slim\Views\Twig` pointed at `www/templates`; registers globals `auth.logged` and `global.year`.
   - `config/handler.php` — binds `ResponseFactoryInterface` and autowires `HttpErrorHandler`.
 
@@ -31,6 +33,8 @@ public/index.php → Bootstrap\Main → routes/web.php → Controller → Servic
 - **Service** — business logic. `DashboardService` orchestrates Docker calls and shapes `{status, message}` results; `AuthService` manages the session; `User/` holds `Validator/` and `Normalizer/` helpers.
 - **Model** — `UserModel` sits between controller and repo (hashing passwords, building entities). `AbstractModel` is currently empty.
 - **Repository** — extend `AbstractRepo` (holds the DBAL `Connection`, declares `abstract hydrate()`). **Data access is raw SQL through DBAL `Connection` — there is no ORM.** Writes wrap `beginTransaction()/commit()/rollback()`; reads use `fetchAssociative`/`fetchOne`; `hydrate()` maps a row to an `Entity`.
+- **Database** — `ConnectionFactory` (a DBAL `Connection` for any database name) and `Migrator` (applies `www/database/migrations/*.sql`, tracked in `schema_migrations`; see `.claude/arch-explain/migrations.md`).
+- **Console** — `Terminal`: CLI input/output helpers (`ask()` with hidden input, `success()`, `fail()`).
 - **Entity** — plain immutable-ish PHP objects (`final class`, private props, getters). `User::setId()` throws if the id is already set. `Role` exposes `ROLE_ADMIN = 1` / `ROLE_USER = 2` constants matching the seeded `roles` table.
 
 ## Auth

@@ -121,7 +121,7 @@ _wait-db: _docker _env
     set -euo pipefail
     # 127.0.0.1 because on first boot postgres runs a temporary socket-only server, then restarts
     for _ in $(seq 30); do
-        docker compose exec -T postgres pg_isready -q -h 127.0.0.1 && exit 0
+        docker compose exec -T postgres pg_isready -q -h 127.0.0.1 -d postgres && exit 0
         sleep 1
     done
     echo "✖ Postgres did not become ready within 30 seconds." >&2

@@ -19,9 +19,12 @@ sessão atualiza este arquivo; quem começar lê este arquivo primeiro.
   o `run.sh` foi trocado por um `justfile` ([just](https://just.systems), `sudo apt install
   just`). O `just` não aceita `:` em nomes: os comandos são `cs-fix`, `db-reset` e
   `admin-create`.
-- **Etapa 4 (migrações):** entregue em 2026-10-21, aguardando conferência. Migrações em
-  `www/database/migrations/`, runner `www/bin/migrate.php` (`--fresh` recria o banco), admin
-  por `www/bin/admin-create.php` (`--if-missing` usado no `just install`). `just migrate`
+- **Etapa 4 (migrações):** entregue em 2026-10-23, aguardando conferência. Migrações em
+  `www/database/migrations/`, lógica em `App\Database\Migrator` e `ConnectionFactory`, I/O de
+  terminal em `App\Console\Terminal`, container compartilhado em
+  `App\Bootstrap\ContainerFactory`. `www/bin/migrate.php` (`--fresh` recria o banco) e
+  `www/bin/admin-create.php` (`--if-missing` usado no `just install`) são só portas de entrada:
+  por pedido do dev, a lógica fica em classes de `src/`, e não em scripts soltos. `just migrate`
   aplica no banco do app e no `wecker_test`. Por decisão do dev, o `admin-create` **não tem
   validação** (MVP); o `UNIQUE` do e-mail é a única barreira. A pedido do dev, a documentação
   começou antes da etapa 6: `.claude/arch-explain/just.md` e `migrations.md`.
@@ -70,6 +73,11 @@ O plano tem o detalhe; aqui só o resumo.
 - O dev escreve em português; respostas em português.
 
 ## Pendências conhecidas
+
+- **Containers depois de reiniciar a máquina (visto em 2026-10-21 e 2026-10-23):** `php` e
+  `nginx` ficam `Exited (127)` sem log, e o `postgres` sobe mas grava fora de `data/postgres`
+  (as migrações feitas no dia 21 não estavam lá no dia 23). Hipótese: o Docker sobe os containers
+  antes de as pastas do WSL estarem montadas. `just up` resolve na hora; falta investigar a causa.
 
 - Os problemas encontrados na análise da v1 estão listados (1–19) no início do plano e são
   tratados nas etapas 7, 8 e 10.

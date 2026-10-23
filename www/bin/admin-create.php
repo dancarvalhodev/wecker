@@ -2,55 +2,35 @@
 
 declare(strict_types=1);
 
+use App\Console\Terminal;
 use App\Entity\Role;
+use App\Model\User\UserModel;
+use App\Service\User\Normalizer\GeneralNormalizer;
+use DI\Container;
 
-require __DIR__ . '/bootstrap.php';
+/** @var Container $container */
+$container = require __DIR__ . '/bootstrap.php';
 
-$connection = connectTo($_ENV['DB_NAME']);
+$terminal = $container->get(Terminal::class);
+$userModel = $container->get(UserModel::class);
+$normalizer = $container->get(GeneralNormalizer::class);
 
-if (in_array('--if-missing', $_SERVER['argv'], true)) {
-    $admins = (int) $connection->fetchOne('SELECT COUNT(*) FROM users WHERE role_id = ?', [Role::ROLE_ADMIN]);
-
-    if ($admins > 0) {
-        echo '✔ An admin already exists, skipping' . PHP_EOL;
-        exit(0);
-    }
+if (in_array('--if-missing', $_SERVER['argv'], true) && $userModel->hasAdmin()) {
+    $terminal->success('An admin already exists, skipping');
+    exit(0);
 }
 
-echo 'Create the admin user' . PHP_EOL;
+$terminal->line('Create the admin user');
 
-$name = ask('Name: ');
-$email = strtolower(ask('Email: '));
-$password = ask('Password: ', hidden: true);
-
-$connection->insert('users', [
-    'name'     => $name,
-    'email'    => $email,
-    'password' => password_hash($password, PASSWORD_DEFAULT),
-    'role_id'  => Role::ROLE_ADMIN,
+$data = $normalizer->clean([
+    'name'     => $terminal->ask('Name: '),
+    'email'    => $terminal->ask('Email: '),
+    'password' => $terminal->ask('Password: ', hidden: true),
 ]);
 
-echo "✔ Admin $email created" . PHP_EOL;
-
-/**
- * @param string $label
- * @param bool $hidden
- * @return string
- */
-function ask(string $label, bool $hidden = false): string
-{
-    echo $label;
-
-    if ($hidden) {
-        shell_exec('stty -echo 2>/dev/null');
-    }
-
-    $answer = fgets(STDIN);
-
-    if ($hidden) {
-        shell_exec('stty echo 2>/dev/null');
-        echo PHP_EOL;
-    }
-
-    return trim($answer === false ? '' : $answer);
+try {
+    $admin = $userModel->createUser($data, Role::ROLE_ADMIN);
+    $terminal->success("Admin {$admin->getEmail()} created");
+} catch (Throwable $e) {
+    $terminal->fail($e->getMessage());
 }

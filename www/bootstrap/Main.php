@@ -5,7 +5,6 @@ namespace App\Bootstrap;
 use App\Handler\HttpErrorHandler;
 use DI\Bridge\Slim\Bridge;
 use DI\Container;
-use DI\ContainerBuilder;
 use Dotenv\Dotenv;
 use Exception;
 use Slim\App;
@@ -54,19 +53,7 @@ final class Main
      */
     private function buildContainer(): void
     {
-        $builder = new ContainerBuilder();
-        $builder->useAttributes(true);
-        $builder->useAutowiring(true);
-
-        if (Application::isProduction()) {
-            $builder->enableCompilation(dirname(__DIR__) . '/storage/cache');
-            $builder->writeProxiesToFile(true, dirname(__DIR__) . '/storage/cache');
-        }
-
-        $builder->addDefinitions(dirname(__DIR__) . '/config/database.php');
-        $builder->addDefinitions(dirname(__DIR__) . '/config/twig.php');
-        $builder->addDefinitions(dirname(__DIR__) . '/config/handler.php');
-        $this->container = $builder->build();
+        $this->container = ContainerFactory::create();
     }
 
     /**

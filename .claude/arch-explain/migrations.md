@@ -34,34 +34,56 @@ O **livro de obras de um prédio**.
 www/
 ├── database/migrations/
 │   └── 001_create_roles_and_users.sql   ← tabelas roles e users + papéis ADMIN(1) e USER(2)
-└── bin/
-    ├── bootstrap.php     ← autoload, .env, connectTo() e fail()
-    ├── migrate.php       ← o runner
-    └── admin-create.php  ← cria um usuário admin
+├── src/
+│   ├── Database/
+│   │   ├── ConnectionFactory.php  ← cria uma Connection do DBAL para qualquer banco (lê DB_* do .env)
+│   │   └── Migrator.php           ← a lógica: criar/apagar banco, ler o livro, aplicar os .sql
+│   └── Console/
+│       └── Terminal.php           ← perguntar (com senha oculta), imprimir ✔/✖, falhar
+├── bootstrap/
+│   └── ContainerFactory.php       ← monta o container de DI (usado pela web e pelo terminal)
+└── bin/                           ← portas de entrada pelo terminal, finas
+    ├── bootstrap.php     ← autoload + .env + devolve o container
+    ├── migrate.php       ← lê os argumentos, chama o Migrator, imprime
+    └── admin-create.php  ← pergunta os dados, chama o UserModel, imprime
 ```
+
+A divisão segue o resto do projeto. O `public/index.php` é a porta de entrada **pela web**: monta
+o app e entrega o pedido a um controller. Os arquivos de `bin/` são as portas de entrada **pelo
+terminal**: montam o container e entregam o trabalho a uma classe de `src/`. A lógica fica nas
+classes, que recebem as dependências por injeção, como os controllers e os services. Por isso dá
+para usar o `Migrator` também a partir dos testes (etapa 7), sem passar pelo terminal.
+
+O `ConnectionFactory` é usado nos dois lados. O `config/database.php` pede a ele a conexão do app
+(`DB_NAME`), e o `Migrator` pede conexões para o banco `postgres` e para o `wecker_test`. A
+configuração do banco fica num lugar só.
 
 O nome do arquivo sem `.sql` é a **versão** (`001_create_roles_and_users`), e é isso que vai para o
 livro. O prefixo numérico define a ordem: o `glob()` devolve os arquivos em ordem alfabética, e
 `001` < `002` < `010`. Por isso o número tem três dígitos.
 
-### O que o `migrate.php` faz, passo a passo
+### O que acontece num `migrate`, passo a passo
 
 ```
 php bin/migrate.php [--fresh] [banco]
 ```
 
-1. **Decide o banco.** Usa o argumento, se houver (`wecker_test`); senão, o `DB_NAME` do
-   `www/.env` (`wecker`).
-2. **Valida o nome do banco** com a regex `^[a-z_][a-z0-9_]*$`. Nome de banco não pode ir como
-   parâmetro `?` no SQL (parâmetros servem para valores, não para nomes), então ele é colado no
-   comando. A regex garante que só letras minúsculas, números e `_` cheguem lá.
+O `bin/migrate.php` só faz os passos 1 e 8. Os demais são métodos do `Migrator`.
+
+1. **Decide o banco** (`bin/migrate.php`). Usa o argumento, se houver (`wecker_test`); senão, o
+   `DB_NAME` do `www/.env` (`wecker`).
+2. **Valida o nome do banco** (`Migrator::quoteName()`) com a regex `^[a-z_][a-z0-9_]*$`. Nome de
+   banco não pode ir como parâmetro `?` no SQL (parâmetros servem para valores, não para nomes),
+   então ele é colado no comando. A regex garante que só letras minúsculas, números e `_` cheguem
+   lá; qualquer outra coisa gera `InvalidArgumentException`.
 3. **Conecta no banco `postgres`.** Todo servidor Postgres tem esse banco de manutenção. Ele é
    necessário porque não dá para criar ou apagar um banco estando conectado nele mesmo.
-4. **Se `--fresh`:** `DROP DATABASE IF EXISTS ... WITH (FORCE)`. O `FORCE` derruba conexões abertas
-   (o php-fpm pode estar conectado), que de outro modo bloqueariam o `DROP`.
-5. **Se o banco não existe, cria.** Foi assim que o `wecker_test` nasceu no primeiro
-   `just migrate`.
-6. **Conecta no banco-alvo e cria o livro**, se ainda não existir:
+4. **Se `--fresh`** (`Migrator::dropDatabase()`): `DROP DATABASE IF EXISTS ... WITH (FORCE)`. O
+   `FORCE` derruba conexões abertas (o php-fpm pode estar conectado), que de outro modo
+   bloqueariam o `DROP`.
+5. **Se o banco não existe, cria** (`Migrator::createDatabaseIfMissing()`, que devolve `true`
+   quando criou). Foi assim que o `wecker_test` nasceu no primeiro `just migrate`.
+6. **Conecta no banco-alvo e cria o livro** (`Migrator::migrate()`), se ainda não existir:
 
    ```sql
    CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -77,9 +99,12 @@ php bin/migrate.php [--fresh] [banco]
    - anota a versão no livro;
    - `COMMIT`.
 
-   Se qualquer coisa falhar: `ROLLBACK`, mensagem `✖ Migration X failed: ...` e saída com erro. As
-   migrações seguintes não rodam.
-8. **Resumo:** `✔ wecker: 1 migration(s) applied` ou `✔ wecker is up to date`.
+   Se qualquer coisa falhar: `ROLLBACK` e uma `RuntimeException` com a mensagem
+   `Migration X failed: ...`. As migrações seguintes não rodam. O método devolve a lista das
+   versões aplicadas nesta execução.
+8. **Imprime** (`bin/migrate.php`, pelo `Terminal`): uma linha `✔ Applied X` por versão aplicada e
+   o resumo `✔ wecker: 1 migration(s) applied` ou `✔ wecker is up to date`. Se o `Migrator`
+   lançou exceção, imprime `✖ <mensagem>` e sai com código 1.
 
 Um detalhe que faz o passo 7 funcionar: no Postgres, até `CREATE TABLE` respeita transação. Se a
 `001` criasse `roles` e falhasse em `users`, o `ROLLBACK` apagaria `roles` também, e o banco
@@ -110,18 +135,27 @@ você:
 php bin/admin-create.php [--if-missing]
 ```
 
-1. **Com `--if-missing`:** conta os usuários com `role_id = Role::ROLE_ADMIN`. Se já houver algum,
-   imprime `✔ An admin already exists, skipping` e sai. É o modo que o `just install` usa, para
-   não pedir admin toda vez que você reinstala.
-2. Pergunta **nome**, **e-mail** e **senha**. Na senha, `stty -echo` desliga o eco do terminal
-   (o que você digita não aparece) e `stty echo` religa em seguida.
-3. Passa o e-mail para minúsculas. O login faz o mesmo (`GeneralNormalizer`); sem isso, um admin
-   cadastrado como `Admin@X.com` nunca conseguiria entrar.
-4. Grava com `password_hash()` (bcrypt, o mesmo do `UserModel`) e `role_id = Role::ROLE_ADMIN`.
+1. **Com `--if-missing`:** pergunta ao `UserModel::hasAdmin()`, que chama
+   `UserRepo::existsWithRole(Role::ROLE_ADMIN)`. Se já houver algum admin, imprime
+   `✔ An admin already exists, skipping` e sai. É o modo que o `just install` usa, para não pedir
+   admin toda vez que você reinstala.
+2. Pergunta **nome**, **e-mail** e **senha** pelo `Terminal::ask()`. Na senha, `stty -echo`
+   desliga o eco do terminal (o que você digita não aparece) e `stty echo` religa em seguida.
+3. Passa os dados pelo `GeneralNormalizer::clean()`, o mesmo do cadastro e do login: tira espaços
+   das pontas e põe o e-mail em minúsculas. Sem isso, um admin cadastrado como `Admin@X.com` nunca
+   conseguiria entrar, porque o login converte o e-mail digitado para minúsculas.
+4. Grava pelo caminho de sempre, `UserModel::createUser($data, Role::ROLE_ADMIN)` → `UserRepo::save()`,
+   com `password_hash()` (bcrypt).
 
-O script insere direto pela conexão, sem passar pelo `UserRepo`, porque o `UserRepo::save()`
-grava `ROLE_USER` sempre, ignorando o papel do usuário. Isso será tratado nas etapas de usuários
-(14–15).
+Para isso funcionar, duas coisas mudaram no código de usuários:
+
+- O `UserModel::createUser()` ganhou o parâmetro `$roleId`, com padrão `Role::ROLE_USER`. O
+  cadastro público continua chamando sem o parâmetro, e nada muda para ele.
+- O `UserRepo::save()` gravava `Role::ROLE_USER` fixo, ignorando o papel do usuário. Agora grava
+  `$user->getRoleId()`. Para o cadastro, o valor é o mesmo de antes.
+
+O `UserRepo::hydrate()` ainda monta todo usuário lido do banco como `ROLE_USER`. Não afeta nada
+hoje, porque ninguém consulta o papel, mas precisa ser corrigido nas etapas de permissões (14–15).
 
 ### Por que o `just` espera o Postgres (`_wait-db`)
 
@@ -132,9 +166,10 @@ No **primeiro** `up`, com a pasta `data/postgres` vazia, o container do Postgres
 3. desliga esse servidor e sobe o definitivo, que escuta na rede.
 
 Isso leva alguns segundos, e um `migrate` logo depois do `up` falharia. O `_wait-db` testa
-`pg_isready -h 127.0.0.1` uma vez por segundo, por até 30 segundos. O `-h 127.0.0.1` força o teste
-pela rede: o servidor temporário do passo 1 responderia "pronto" pelo socket e enganaria a
-checagem.
+`pg_isready -h 127.0.0.1 -d postgres` uma vez por segundo, por até 30 segundos. O `-h 127.0.0.1`
+força o teste pela rede: o servidor temporário do passo 1 responderia "pronto" pelo socket e
+enganaria a checagem. O `-d postgres` evita uma linha `FATAL: database "root" does not exist` no
+log a cada teste: sem ele, o `pg_isready` tenta um banco com o nome do usuário.
 
 ## Pegadinhas
 
@@ -154,6 +189,12 @@ checagem.
   bin/admin-create.php`), o `stty` falha em silêncio, sem quebrar o script.
 - **`$_SERVER['argv']` em vez de `$argv`:** são o mesmo array, mas o PHPStan não sabe que `$argv`
   sempre existe na linha de comando e acusaria erro.
+- **Nos scripts de `bin/`, a mensagem de sucesso fica dentro do `try`.** O container devolve os
+  objetos sem tipo, então o PHPStan não sabe que `$terminal->fail()` encerra o programa e acusaria
+  "variável pode não estar definida" numa linha depois do `catch`.
+- **Uma migração que falha não apaga as anteriores da mesma execução.** Se a `002` passa e a `003`
+  falha, a `002` fica aplicada e anotada, e a próxima execução tenta só a `003`. Mas o terminal
+  mostra só o erro da `003`, sem as linhas `✔ Applied` das que passaram.
 
 ## Comandos úteis
 

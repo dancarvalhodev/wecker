@@ -21,22 +21,32 @@ class UserModel
 
     /**
      * @param array $data
+     * @param int $roleId
      * @return User
      * @throws Exception
      */
-    public function createUser(array $data): User
+    public function createUser(array $data, int $roleId = Role::ROLE_USER): User
     {
         $user = new User(
             null,
             $data['name'],
             $data['email'],
             password_hash($data['password'], PASSWORD_DEFAULT),
-            Role::ROLE_USER,
+            $roleId,
         );
 
         $user = $this->userRepo->save($user);
 
         return $user;
+    }
+
+    /**
+     * @return bool
+     * @throws Exception
+     */
+    public function hasAdmin(): bool
+    {
+        return $this->userRepo->existsWithRole(Role::ROLE_ADMIN);
     }
 
     /**

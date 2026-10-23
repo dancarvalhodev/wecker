@@ -26,7 +26,7 @@ class UserRepo extends AbstractRepo
                     $user->getName(),
                     $user->getEmail(),
                     $user->getPassword(),
-                    Role::ROLE_USER,
+                    $user->getRoleId(),
                     $user->getCreatedAt(),
                     $user->getUpdatedAt()
                 ]
@@ -58,6 +58,16 @@ class UserRepo extends AbstractRepo
         }
 
         return $this->hydrate($data);
+    }
+
+    /**
+     * @param int $roleId
+     * @return bool
+     * @throws Exception
+     */
+    public function existsWithRole(int $roleId): bool
+    {
+        return $this->connection->fetchOne('SELECT 1 FROM users WHERE role_id = ? LIMIT 1', [$roleId]) !== false;
     }
 
     /**
