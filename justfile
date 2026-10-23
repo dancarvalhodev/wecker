@@ -1,10 +1,12 @@
+test_db := "wecker_test"
+
 [private]
 default:
     @just --list --unsorted
 
-# First run: setup + up + composer install
+# First run: setup + up + composer install + migrate + create admin
 [group('environment')]
-install: setup up (composer "install --no-interaction")
+install: setup up (composer "install --no-interaction") migrate _admin-if-missing
     @echo "✔ Install complete: http://localhost"
 
 # Create .env and www/.env from the examples
@@ -41,6 +43,24 @@ logs: _docker _env
 [group('environment')]
 shell service="php": (_running service)
     docker compose exec {{ service }} sh
+
+# Apply pending migrations to the app and test databases
+[group('database')]
+migrate: (_running "php") _wait-db
+    docker compose exec php php bin/migrate.php
+    docker compose exec php php bin/migrate.php {{ test_db }}
+
+# Drop and recreate the app and test databases from the migrations
+[group('database')]
+[confirm("This deletes ALL data in the app and test databases. Continue? [y/N]")]
+db-reset: (_running "php") _wait-db
+    docker compose exec php php bin/migrate.php --fresh
+    docker compose exec php php bin/migrate.php --fresh {{ test_db }}
+
+# Create an admin user (asks for name, email and password)
+[group('database')]
+admin-create: (_running "php")
+    docker compose exec php php bin/admin-create.php
 
 # Run Composer in the php container
 [group('php')]
@@ -92,6 +112,20 @@ _docker:
 
 _env:
     @[ -f .env ] || { echo "✖ .env not found. Run: just setup" >&2; exit 1; }
+
+_admin-if-missing: (_running "php")
+    docker compose exec php php bin/admin-create.php --if-missing
+
+_wait-db: _docker _env
+    #!/usr/bin/env bash
+    set -euo pipefail
+    # 127.0.0.1 because on first boot postgres runs a temporary socket-only server, then restarts
+    for _ in $(seq 30); do
+        docker compose exec -T postgres pg_isready -q -h 127.0.0.1 && exit 0
+        sleep 1
+    done
+    echo "✖ Postgres did not become ready within 30 seconds." >&2
+    exit 1
 
 _running service: _docker _env
     @[ -n "$(docker compose ps --status running --quiet {{ service }})" ] || { echo "✖ The '{{ service }}' container is not running. Run: just up" >&2; exit 1; }

@@ -11,7 +11,7 @@ Wecker is a Portainer-inspired web UI for managing Docker containers. A PHP (Sli
 All commands run through the `justfile` ([just](https://just.systems), from repo root). `just` with no args lists them:
 
 ```bash
-just install          # first run: setup + up + composer install
+just install          # first run: setup + up + composer install + migrate + create admin
 just setup            # copy env-example -> .env and www/env-example -> www/.env
 just up               # docker compose up -d --build; app served at http://localhost
 just stop | status | logs
@@ -20,7 +20,15 @@ just reset            # down -v + prune project containers/images
 just nuke             # docker system prune -af --volumes (destroys ALL docker state; typed confirmation)
 ```
 
-First-run bootstrap also requires loading `docs/database.sql` into the postgres db (creates `roles`/`users`, seeds `admin@admin.com`). See README for the full sequence.
+Database (schema lives in `www/database/migrations/NNN_description.sql`, applied by `www/bin/migrate.php` and tracked in `schema_migrations`):
+
+```bash
+just migrate          # apply pending migrations to the app db and to wecker_test
+just db-reset         # drop + recreate both dbs from the migrations (asks for confirmation)
+just admin-create     # interactive: name, email, password -> user with Role::ROLE_ADMIN
+```
+
+New migration = new numbered `.sql` file; never edit one that was already applied.
 
 Composer / tests run **inside the php container** (php 8.5, Alpine); the recipes wrap `docker compose exec php composer ...`:
 

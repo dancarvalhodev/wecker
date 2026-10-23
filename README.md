@@ -10,9 +10,7 @@ Note: Requires Docker Desktop on Windows/macOS.
 1. Install docker.
     1. On windows you need to activate WSL2 and enable "Expose daemon on tcp://localhost:2375 without TLS" option.
 2. Install [just](https://just.systems) (e.g. `sudo apt install just`, `brew install just` or `winget install Casey.Just`).
-3. Run `just install`
-4. Configure the postgresql database with user/login equals to root.
-5. Run database.sql script into database.
+3. Run `just install` (it creates the database and asks for the admin's name, email and password).
 
 # Pending to Fix
 - Implement tests.

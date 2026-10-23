@@ -19,10 +19,5 @@ CREATE TABLE users (
         ON DELETE RESTRICT
 );
 
-INSERT INTO roles (id, name, type, created_at)
-VALUES (DEFAULT, 'ADMIN', 'ADMIN', DEFAULT);
-
-INSERT INTO roles (id, name, type, created_at)
-VALUES (DEFAULT, 'USER', 'USER', DEFAULT);
-
-INSERT INTO users (name, email, password, role_id, created_at, updated_at) VALUES ('Administrator', 'admin@admin.com', '$2y$12$mFISnnhc9H2S351RYCDoouLe0/DSzVe1IHBUSFo02QUtNHMbZ1IsW', 1, '2026-03-08 13:58:32.000000', '2026-03-08 13:58:32.000000');
+INSERT INTO roles (name, type) VALUES ('ADMIN', 'ADMIN');
+INSERT INTO roles (name, type) VALUES ('USER', 'USER');

@@ -3,7 +3,7 @@
 Resumo para continuar o desenvolvimento em outro computador (ou voltar a este). Quem terminar uma
 sessão atualiza este arquivo; quem começar lê este arquivo primeiro.
 
-Última atualização: 2026-10-20.
+Última atualização: 2026-10-21.
 
 ## Onde paramos
 
@@ -15,11 +15,16 @@ sessão atualiza este arquivo; quem começar lê este arquivo primeiro.
   testes verdes (1 placeholder), `stan` com 39 erros (nível 6) e `cs` com 27 de 29 arquivos a
   corrigir. Os dois devem ser zerados nas etapas 7–10. Guzzle fixado em `^8.3` (estável), por
   decisão do dev. O `www/composer.lock` passou a ser versionado (saiu do `.gitignore`).
-- **Etapa 3 (`run.sh` aprimorado → `justfile`):** entregue em 2026-10-20, aguardando
-  conferência. Por decisão do dev, o `run.sh` foi trocado por um `justfile` ([just](https://just.systems),
-  `sudo apt install just`). O `just` não aceita `:` em nomes: os comandos são `cs-fix`,
-  `db-reset` e `admin-create`. `migrate`, `db-reset`, `admin-create` e a parte do `install` que
-  migra/cria admin foram movidos para a etapa 4.
+- **Etapa 3 (`run.sh` aprimorado → `justfile`):** confirmada em 2026-10-21. Por decisão do dev,
+  o `run.sh` foi trocado por um `justfile` ([just](https://just.systems), `sudo apt install
+  just`). O `just` não aceita `:` em nomes: os comandos são `cs-fix`, `db-reset` e
+  `admin-create`.
+- **Etapa 4 (migrações):** entregue em 2026-10-21, aguardando conferência. Migrações em
+  `www/database/migrations/`, runner `www/bin/migrate.php` (`--fresh` recria o banco), admin
+  por `www/bin/admin-create.php` (`--if-missing` usado no `just install`). `just migrate`
+  aplica no banco do app e no `wecker_test`. Por decisão do dev, o `admin-create` **não tem
+  validação** (MVP); o `UNIQUE` do e-mail é a única barreira. A pedido do dev, a documentação
+  começou antes da etapa 6: `.claude/arch-explain/just.md` e `migrations.md`.
 
 ## Decisões da entrevista (2026-10-19)
 
@@ -49,7 +54,11 @@ O plano tem o detalhe; aqui só o resumo.
   mostra).
 - **CodeGraph primeiro** (`codegraph_explore`) para entender ou localizar código; `Read` só para o
   que o índice não cobre (Markdown, shell, JSON, Twig).
-- **Sem comandos compostos:** comandos pequenos, de propósito único, com caminhos absolutos.
+- **Sem comandos compostos:** comandos pequenos, de propósito único, com caminhos absolutos —
+  um teste por chamada, sem funções de shell, laços ou `;` encadeando vários casos (o dev
+  interrompeu na etapa 4 por isso).
+- **Não testar o que o plano não pediu** e **não criar dados reais no banco de dev** (ex.: um
+  admin) sem avisar antes: o que exige digitação, o dev testa no terminal dele.
 - **PHP roda no container:** `docker compose exec php ...` (ou `just ...`, a partir da etapa 3).
 - **Git é do dev.** O Claude nunca roda `git add`, `commit`, `push`, `stash` nem abre PR. Quando
   pedido, só escreve a mensagem de commit: em **inglês**, título + corpo **curto** (poucos tópicos, só o essencial), **sem** `:sparkles:` no
