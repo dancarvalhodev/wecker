@@ -57,7 +57,7 @@ If none respond it throws `RuntimeException('Docker não acessível')`. `Dashboa
 
 ## Infra topology (docker-compose)
 
-- `nginx` — serves `www/`, config from `config/nginx/default.conf`, published on `PORT_NGINX`.
-- `php` — php-fpm 8.5 (image `dancarvalhodev/php-alpine:8.5`), mounts `www/` and **`/var/run/docker.sock`**; `entrypoint.sh` adds `www-data` to the docker-socket group so PHP can reach the daemon.
+- `caddy` — HTTP only (`:80`, published on `PORT_HTTP`), config in `config/caddy/Caddyfile`. Mounts only `www/public` (read-only): serves static files and sends everything else to `php:9000` via `php_fastcgi` (front controller `index.php`), setting `APP_ENV=development`. Access logs go to the container output.
+- `php` — Ubuntu 24.04 + `ppa:ondrej/php`, php-fpm 8.5 on port 9000 (`bin/php/Dockerfile`, pool overrides in `bin/php/fpm-pool.conf`), Composer included. Code mounted at **`/var/www/html`**; `config/php/php.ini` is mounted as `conf.d/99-wecker.ini` for both fpm and cli. Also mounts **`/var/run/docker.sock`**; `entrypoint.sh` adds `www-data` to the docker-socket group so PHP can reach the daemon.
 - `postgres` — `DB_*` env, data in `data/postgres`.
-- `redis` — running and exposed on 6379, but not yet used by application code.
+- `redis` — PHP sessions (`session.save_handler = redis` in `php.ini`); exposed on 6379.

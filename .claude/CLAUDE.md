@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Wecker is a Portainer-inspired web UI for managing Docker containers. A PHP (Slim 4) app talks to the Docker Engine HTTP API to list/start/stop containers and read logs, behind a session-based login. The whole stack (nginx, php-fpm, postgres, redis) runs via Docker Compose. Application code lives under `www/`.
+Wecker is a Portainer-inspired web UI for managing Docker containers. A PHP (Slim 4) app talks to the Docker Engine HTTP API to list/start/stop containers and read logs, behind a session-based login. The whole stack (caddy, php-fpm, postgres, redis) runs via Docker Compose. Application code lives under `www/`.
 
 ## Commands
 
@@ -30,7 +30,7 @@ just admin-create     # interactive: name, email, password -> user with Role::RO
 
 New migration = new numbered `.sql` file; never edit one that was already applied.
 
-Composer / tests run **inside the php container** (php 8.5, Alpine); the recipes wrap `docker compose exec php composer ...`:
+Composer / tests run **inside the php container** (php 8.5 on Ubuntu 24.04, code at `/var/www/html`); the recipes wrap `docker compose exec php composer ...`:
 
 ```bash
 just composer <args>        # any composer command

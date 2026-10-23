@@ -24,7 +24,10 @@ sessão atualiza este arquivo; quem começar lê este arquivo primeiro.
   terminal em `App\Console\Terminal`, container compartilhado em
   `App\Bootstrap\ContainerFactory`. `www/bin/migrate.php` (`--fresh` recria o banco) e
   `www/bin/admin-create.php` (`--if-missing` usado no `just install`) são só portas de entrada:
-  por pedido do dev, a lógica fica em classes de `src/`, e não em scripts soltos. `just migrate`
+  por pedido do dev, a lógica fica em classes de `src/`, e não em scripts soltos.
+- **Etapa 4b (incluída em 2026-10-23, a pedido do dev):** PHP em Ubuntu 24.04 + PPA do Ondřej e
+  nginx → Caddy. Decisões: só HTTP local, logs do Caddy no stdout, `PORT_NGINX` → `PORT_HTTP`,
+  código em `/var/www/html`. Em andamento. `just migrate`
   aplica no banco do app e no `wecker_test`. Por decisão do dev, o `admin-create` **não tem
   validação** (MVP); o `UNIQUE` do e-mail é a única barreira. A pedido do dev, a documentação
   começou antes da etapa 6: `.claude/arch-explain/just.md` e `migrations.md`.

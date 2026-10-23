@@ -160,7 +160,7 @@ O `just` sempre roda as receitas **a partir da pasta do `justfile`**, mesmo se v
 subpasta. Por isso `cp env-example .env` funciona sem caminho absoluto.
 
 Os comandos PHP rodam **dentro do container** `php`, onde a pasta de trabalho é
-`/usr/share/nginx/html` (o `www/` montado). Por isso o caminho é `bin/migrate.php`, e não
+`/var/www/html` (o `www/` montado). Por isso o caminho é `bin/migrate.php`, e não
 `www/bin/migrate.php`.
 
 ## Pegadinhas
