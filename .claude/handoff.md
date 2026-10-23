@@ -3,7 +3,7 @@
 Resumo para continuar o desenvolvimento em outro computador (ou voltar a este). Quem terminar uma
 sessão atualiza este arquivo; quem começar lê este arquivo primeiro.
 
-Última atualização: 2026-10-21.
+Última atualização: 2026-10-23.
 
 ## Onde paramos
 
@@ -19,7 +19,7 @@ sessão atualiza este arquivo; quem começar lê este arquivo primeiro.
   o `run.sh` foi trocado por um `justfile` ([just](https://just.systems), `sudo apt install
   just`). O `just` não aceita `:` em nomes: os comandos são `cs-fix`, `db-reset` e
   `admin-create`.
-- **Etapa 4 (migrações):** entregue em 2026-10-23, aguardando conferência. Migrações em
+- **Etapa 4 (migrações):** confirmada em 2026-10-23. Migrações em
   `www/database/migrations/`, lógica em `App\Database\Migrator` e `ConnectionFactory`, I/O de
   terminal em `App\Console\Terminal`, container compartilhado em
   `App\Bootstrap\ContainerFactory`. `www/bin/migrate.php` (`--fresh` recria o banco) e
@@ -27,10 +27,15 @@ sessão atualiza este arquivo; quem começar lê este arquivo primeiro.
   por pedido do dev, a lógica fica em classes de `src/`, e não em scripts soltos.
 - **Etapa 4b (incluída em 2026-10-23, a pedido do dev):** PHP em Ubuntu 24.04 + PPA do Ondřej e
   nginx → Caddy. Decisões: só HTTP local, logs do Caddy no stdout, `PORT_NGINX` → `PORT_HTTP`,
-  código em `/var/www/html`. Em andamento. `just migrate`
+  código em `/var/www/html`. Confirmada em 2026-10-23. `just migrate`
   aplica no banco do app e no `wecker_test`. Por decisão do dev, o `admin-create` **não tem
   validação** (MVP); o `UNIQUE` do e-mail é a única barreira. A pedido do dev, a documentação
-  começou antes da etapa 6: `.claude/arch-explain/just.md` e `migrations.md`.
+  começou antes da etapa 6: `.claude/arch-explain/just.md` e `migrations.md`. A linha
+  `xdebug.log` saiu do `php.ini` (fpm e cli disputavam o `/tmp/xdebug.log`).
+- **Etapa 5 (skill `modernize-php`):** descartada em 2026-10-23 por decisão do dev — só rodaria
+  uma vez. A etapa 9 gera o relatório direto (critérios no plano), e a regra "clareza > código
+  rebuscado" entra no `code-style.md` na etapa 6.
+- **Próxima:** etapa 6 — Documentação e specs (estado atual).
 
 ## Decisões da entrevista (2026-10-19)
 
@@ -81,6 +86,8 @@ O plano tem o detalhe; aqui só o resumo.
   `nginx` ficam `Exited (127)` sem log, e o `postgres` sobe mas grava fora de `data/postgres`
   (as migrações feitas no dia 21 não estavam lá no dia 23). Hipótese: o Docker sobe os containers
   antes de as pastas do WSL estarem montadas. `just up` resolve na hora; falta investigar a causa.
+- **Mount de arquivo único no Docker Desktop/WSL:** depois de editar `config/php/php.ini` ou o
+  `Caddyfile`, `docker compose restart` falha; use `docker compose up -d --force-recreate <serviço>`.
 
 - Os problemas encontrados na análise da v1 estão listados (1–19) no início do plano e são
   tratados nas etapas 7, 8 e 10.
