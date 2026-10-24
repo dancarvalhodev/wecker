@@ -51,6 +51,8 @@ Read the topic files under `.claude/rules/` before working in the corresponding 
 - PHP code style & conventions (naming, patterns, error handling): @rules/code-style.md
 - Frontend (Twig templates, jQuery page modules, DataTables/SweetAlert, JS↔API contracts): @rules/frontend.md
 
+Developer-facing explanations (pt-BR, with analogies) live in `.claude/arch-explain/` — one file per component, starting at `request-flow.md`. Update the matching file when a change alters what it describes.
+
 <!-- CODEGRAPH_START -->
 ## CodeGraph
 

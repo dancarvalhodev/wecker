@@ -35,7 +35,11 @@ sessão atualiza este arquivo; quem começar lê este arquivo primeiro.
 - **Etapa 5 (skill `modernize-php`):** descartada em 2026-10-23 por decisão do dev — só rodaria
   uma vez. A etapa 9 gera o relatório direto (critérios no plano), e a regra "clareza > código
   rebuscado" entra no `code-style.md` na etapa 6.
-- **Próxima:** etapa 6 — Documentação e specs (estado atual).
+- **Etapa 6 (documentação do estado atual):** entregue em 2026-10-23, aguardando conferência.
+  `arch-explain/`: `request-flow`, `di`, `auth`, `docker-client`, `error-handling`, `frontend`,
+  `infra` (além de `just` e `migrations`). Decisões do dev (2026-10-23): as
+  specs de `docs/specs/` são escritas no início de cada etapa de feature (14–18), e o
+  `arch-explain/testing.md` vai para a etapa 7.
 
 ## Decisões da entrevista (2026-10-19)
 

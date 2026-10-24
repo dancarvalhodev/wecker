@@ -1,0 +1,102 @@
+# DockerClient (falando com o Docker)
+
+## O que é
+
+O Docker tem dois lados: o **daemon** (`dockerd`), que de fato cria e roda os containers, e os
+clientes, como o comando `docker`. Eles conversam por uma **API HTTP**, a Docker Engine API:
+`docker ps` é, por baixo, um `GET /containers/json`.
+
+O Wecker é mais um cliente dessa API. O `App\Service\Api\DockerClient` faz as chamadas HTTP com o
+Guzzle e devolve os resultados para o `DashboardService`.
+
+## Analogia
+
+O **interfone para o prédio do Docker**.
+
+- O prédio (o daemon) atende por mais de uma entrada. Pode haver um **interfone na rua** (TCP,
+  porta 2375) ou uma **linha interna** (o socket `/var/run/docker.sock`), que só funciona para quem
+  está dentro.
+- Ao chegar, o `DockerClient` **testa os interfones em ordem**: aperta e diz "alô?" (`_ping`). O
+  primeiro que responde "OK" é o que ele usa.
+- Cada pedido é uma frase padronizada da API: "inicie o apartamento X" é
+  `POST /containers/X/start`. O prédio responde com um código: 204 "feito", 304 "já estava assim",
+  404 "não conheço esse apartamento".
+
+## Como funciona aqui
+
+### A descoberta do daemon
+
+No construtor, `detectClient()` cria um `GuzzleHttp\Client` para cada candidato e testa
+`GET _ping`, que deve responder `OK`:
+
+| Ordem | `base_uri` | Quando funciona |
+|---|---|---|
+| 1 | `http://host.docker.internal:2375/v1.54/` | Docker Desktop, com "Expose daemon on tcp://localhost:2375 without TLS" ligado |
+| 2 | `http://127.0.0.1:2375/v1.54/` | Daemon exposto em TCP na mesma máquina |
+| 3 | `http://localhost/v1.54/` + `CURLOPT_UNIX_SOCKET_PATH => /var/run/docker.sock` | Linux (e WSL), pelo socket montado no container `php` |
+
+No terceiro, o `localhost` da URL é só enfeite: a opção do cURL manda a requisição pelo arquivo de
+socket, e o host não é usado para conectar.
+
+Se nenhum responder, lança `RuntimeException('Docker não acessível')`.
+
+O socket só funciona porque o `docker-compose.yml` monta `/var/run/docker.sock` no container `php`
+e o `bin/php/entrypoint.sh` põe o usuário `www-data` (o do php-fpm) no grupo dono do socket
+(ver [infra.md](infra.md)).
+
+### As chamadas
+
+| Método | Chamada à API | Devolve |
+|---|---|---|
+| `getContainers()` | `GET containers/json?all=true` | Lista de objetos (`json_decode` sem `true`: acesso com `->Id`, `->State`...) |
+| `startContainer($id)` | `POST containers/$id/start` | Só o código HTTP |
+| `stopContainer($id)` | `POST containers/$id/stop` | Só o código HTTP |
+| `logs($id)` | `GET containers/$id/logs?stdout=1&stderr=1&tail=10` | `['statusCode' => ..., 'body' => ...]` |
+
+A versão da API vem da constante `VERSION = 'v1.54'`, no começo de toda URL. Fixar a versão
+garante que as respostas tenham sempre o mesmo formato, mesmo se o Docker for atualizado.
+
+### O que o `DashboardService` faz com isso
+
+- **Contadores** (`getDockerStats()`): conta `running` (estado `running`) e `stopped` (`exited`,
+  `created` ou `dead`). O total desconta os containers do próprio Wecker.
+- **Tabela** (`getDockerContainerData()`): monta `{id, name, status, image, ports}` por container.
+- **Esconde o próprio Wecker:** pula todo container cuja imagem contém `wecker`
+  (`SYSTEM_IMAGE_SUFIX`), como `wecker-php` e `wecker-caddy`. Assim ninguém para o Wecker pelo
+  próprio Wecker.
+- **Start/stop:** traduz o código em mensagem com `match` (204 → "Container started", 304 →
+  "Container already started").
+
+## Pegadinhas
+
+- **O `id` vai direto na URL.** `"containers/$id/start"` sem validar: um `id` como `../../algo`
+  muda o endpoint chamado (problema 1 do plano, **segurança**, etapa 8).
+- **O 404 nunca chega ao `match`.** O Guzzle, por padrão (`http_errors`), **lança exceção** em
+  respostas 4xx e 5xx. Um container inexistente gera uma `ClientException`, que vira 500 no
+  `HttpErrorHandler`, e não "Container not found". Só o 204 e o 304 chegam ao `match`.
+- **O cache `static` não dura entre requisições.** `self::$cached` evita testar os candidatos de
+  novo *na mesma requisição*. No php-fpm, cada requisição começa com as `static` zeradas, então a
+  descoberta (até três `_ping`) roda em toda requisição.
+- **Lista vazia vira erro.** Sem nenhum container, `getContainers()` devolve `[]`, e o `if
+  (!$containers)` do service lança "Docker containers not found": o dashboard quebra (problema 8).
+- **Portas montadas errado.** `Ports[0]->PublicPort . ':' . Ports[1]->PrivatePort` mistura duas
+  entradas diferentes da lista (problema 9).
+- **Logs com bytes estranhos.** Sem TTY, o Docker envia os logs multiplexados: cada bloco começa
+  com um cabeçalho binário de 8 bytes, que aparece como lixo no modal (problema 10). O
+  `header('Content-Type: text/plain')` dentro do `logs()` também não tem efeito útil, porque a
+  resposta final é montada pelo controller como JSON.
+- **Filtrar pela imagem é frágil.** Uma imagem reconstruída deixa o container antigo apontando
+  para um `sha256:...` sem nome, que não contém `wecker` e passa a aparecer na tabela.
+- **`new DockerClient()` em todo método.** O service cria o cliente por conta própria, então não dá
+  para trocar por um falso nos testes (problema 13, etapa 7).
+
+## Comandos úteis
+
+```bash
+# as mesmas chamadas que o Wecker faz, pelo socket, do host
+curl --unix-socket /var/run/docker.sock http://localhost/v1.54/_ping
+curl --unix-socket /var/run/docker.sock 'http://localhost/v1.54/containers/json?all=true'
+
+# versão da API que o daemon suporta
+docker version --format '{{.Server.APIVersion}}'
+```

@@ -2,6 +2,15 @@
 
 Target runtime is **PHP 8.5**. Match the surrounding file — the codebase is internally consistent.
 
+## Clarity over cleverness
+
+The code must read well for a junior/mid-level developer. Use a language feature only when it makes the code *easier to read* than the alternative — not because it is new or shorter. Before reaching for one, ask: would someone new to the codebase understand it on the first read? Does it remove code or risk, or only rearrange it? Does it fit how the rest of the codebase is written?
+
+- Prefer a named variable per step over a long `|>` chain or nested calls.
+- Prefer a plain `if` over nested ternaries or chained `?:`/`??`.
+- Prefer an explicit method over a closure stored in a constant or a property hook that only shortens a clear getter.
+- Few comments: only the *why* the code cannot show.
+
 ## Namespacing & layout
 
 - PSR-4: `App\` → `www/src/`, `App\Bootstrap\` → `www/bootstrap/` (see `www/composer.json`).
