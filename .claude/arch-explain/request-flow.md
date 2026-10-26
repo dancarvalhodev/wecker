@@ -61,9 +61,9 @@ new Main()->run();
 
 - O autoload do Composer permite usar qualquer classe sem `require`.
 - `session_start()` lê o cookie `PHPSESSID` e carrega `$_SESSION` do Redis (ver [auth.md](auth.md)).
-- `new Main()` monta o app. O construtor faz, em ordem: `loadConfigs()` (lê o `www/.env`),
-  `buildContainer()` (o container de DI, ver [di.md](di.md)), `createApp()` (o app Slim),
-  `registerMiddlewares()` (o tratamento de erros) e `registerRoutes()`.
+- `new Main()` monta o app. O construtor lê o `www/.env` (`loadConfigs()`), pede o container de
+  DI ao `ContainerFactory` (ver [di.md](di.md)) e o app Slim ao `AppFactory`, que liga o
+  tratamento de erros e registra as rotas. Os testes usam as mesmas duas factories.
 - `run()` entrega a requisição ao Slim.
 
 ### 4. A rota (`www/routes/web.php`)
@@ -95,8 +95,7 @@ O controller não sabe falar com o Docker. Ele só confere que veio um `id` e re
 ### 6. O service (`DashboardService::startContainer()`)
 
 ```php
-$dockerClient = new DockerClient();
-$statusCode = $dockerClient->startContainer($id);
+$statusCode = $this->dockerClient->startContainer($id);
 $message = match ($statusCode) {
     204 => 'Container started',
     304 => 'Container already started',
@@ -110,7 +109,8 @@ corpo) vira 200, porque o `dashboard.js` usa 200 para mostrar o ícone de sucess
 
 ### 7. O `DockerClient` (`Service\Api\DockerClient`)
 
-Descobre como falar com o Docker (TCP ou socket, ver [docker-client.md](docker-client.md)) e faz
+Recebe do container de DI um cliente HTTP já apontado para o Docker (o `DockerClientFactory`
+descobriu se é por TCP ou socket, ver [docker-client.md](docker-client.md)) e faz
 `POST containers/<id>/start` na API do Docker Engine `v1.54`. Devolve só o código de status.
 
 ### 8. A volta
@@ -146,17 +146,13 @@ Todas as rotas `/dashboard*` passam pelo `AuthMidleware`.
 ## Pegadinhas
 
 - **O PHP não guarda nada entre requisições.** Cada requisição monta o app do zero: lê o `.env`,
-  cria o container, registra as rotas. Variáveis `static` também zeram (ver o cache do
-  `DockerClient` em [docker-client.md](docker-client.md)). O que precisa sobreviver vai para a
-  sessão (Redis) ou para o banco.
+  cria o container, registra as rotas, descobre o Docker. Variáveis `static` também zeram. O que
+  precisa sobreviver vai para a sessão (Redis) ou para o banco.
 - **O caminho que o Caddy enxerga não é o do PHP.** O Caddy só monta `www/public`. Um arquivo fora
   dali (`www/src`, `www/.env`) não pode ser servido por engano, porque o Caddy nem o enxerga.
 - **`APP_ENV` vem do Caddy.** `App::isProduction()` lê `getenv('APP_ENV')`, que é preenchido pelo
   `env APP_ENV development` do Caddyfile. Num script de terminal (`bin/`), ele fica vazio; nos
   testes, vem do `phpunit.xml` (`testing`).
-- **`DashboardController` ignora o service injetado.** O construtor recebe um `DashboardService`,
-  mas faz `new DashboardService()`; e o service faz `new DockerClient()` em todo método. Funciona,
-  mas impede trocar o Docker por um falso nos testes (problema 13 do plano, etapa 7).
 
 ## Comandos úteis
 

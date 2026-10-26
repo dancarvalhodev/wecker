@@ -29,6 +29,7 @@ final class ContainerFactory
         $builder->addDefinitions(dirname(__DIR__) . '/config/database.php');
         $builder->addDefinitions(dirname(__DIR__) . '/config/twig.php');
         $builder->addDefinitions(dirname(__DIR__) . '/config/handler.php');
+        $builder->addDefinitions(dirname(__DIR__) . '/config/docker.php');
 
         return $builder->build();
     }

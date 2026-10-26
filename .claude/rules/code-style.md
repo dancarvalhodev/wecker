@@ -40,7 +40,7 @@ Methods carry full docblocks with `@param`, `@return`, and `@throws` even when t
 
 Prefer **constructor injection** with typed params; PHP-DI autowires them. Assign each dependency to a private typed property in the constructor.
 
-⚠️ Some existing classes bypass DI and `new` their collaborators directly (e.g. `DashboardController::__construct` receives a `DashboardService` but ignores it and does `new DashboardService()`, which in turn does `new DockerClient()`). This is an inconsistency, not the intended pattern — prefer using the injected dependency in new code, and follow the existing file's style when editing it.
+Never `new` a collaborator inside a class (e.g. `new DockerClient()` in a service): tests replace dependencies through the container (`$container->set(...)`), and a hand-built object ignores that. Objects that need runtime setup get a factory plus a definition in `config/*.php` (see `DockerClientFactory` + `config/docker.php`).
 
 ## Data access (repositories)
 

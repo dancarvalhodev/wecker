@@ -14,6 +14,14 @@ class DashboardService
 
     const SYSTEM_IMAGE_SUFIX = 'wecker';
 
+    /** @var DockerClient $dockerClient */
+    private DockerClient $dockerClient;
+
+    public function __construct(DockerClient $dockerClient)
+    {
+        $this->dockerClient = $dockerClient;
+    }
+
     /**
      * @return array
      * @throws DockerException
@@ -21,8 +29,7 @@ class DashboardService
      */
     public function getDockerStats(): array
     {
-        $dockerClient = new DockerClient();
-        $containers = $dockerClient->getContainers();
+        $containers = $this->dockerClient->getContainers();
 
         if (!$containers) {
             throw new DockerException(['Docker containers not found']);
@@ -38,8 +45,7 @@ class DashboardService
      */
     public function getDockerContainerData(): array
     {
-        $dockerClient = new DockerClient();
-        $containers = $dockerClient->getContainers();
+        $containers = $this->dockerClient->getContainers();
 
         if (!$containers) {
             throw new DockerException(['Docker containers not found']);
@@ -55,8 +61,7 @@ class DashboardService
      */
     public function startContainer(string $id): array
     {
-        $dockerClient = new DockerClient();
-        $statusCode = $dockerClient->startContainer($id);
+        $statusCode = $this->dockerClient->startContainer($id);
 
         $message = match ($statusCode) {
             204 => 'Container started',
@@ -78,8 +83,7 @@ class DashboardService
      */
     public function stopContainer(string $id): array
     {
-        $dockerClient = new DockerClient();
-        $statusCode = $dockerClient->stopContainer($id);
+        $statusCode = $this->dockerClient->stopContainer($id);
 
         $message = match ($statusCode) {
             204 => 'Container stopped',
@@ -101,8 +105,7 @@ class DashboardService
      */
     public function logs(string $id): array
     {
-        $dockerClient = new DockerClient();
-        $logReturn = $dockerClient->logs($id);
+        $logReturn = $this->dockerClient->logs($id);
 
         return [
             'status' => $logReturn['statusCode'],

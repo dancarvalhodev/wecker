@@ -41,7 +41,7 @@ just cs                     # PHP-CS-Fixer check, PER-CS 2.0 (.php-cs-fixer.dist
 just cs-fix                 # apply PHP-CS-Fixer fixes
 ```
 
-Note: the test suite is currently a placeholder (`www/tests/Integration/TempTest.php`; `tests/Unit` is empty).
+Tests: `www/tests/bootstrap.php` rebuilds the `wecker_test` database from the migrations on every run. Integration tests extend `Tests\Integration\IntegrationTestCase` (real Slim app, one rolled-back transaction per test, Docker faked with `fakeDocker([...responses])`, login with `actingAs($id)`). See `.claude/arch-explain/testing.md`.
 
 ## Detailed guidance
 

@@ -26,8 +26,8 @@ O **almoxarifado** de uma obra.
 
 ### Onde o container nasce
 
-`App\Bootstrap\ContainerFactory::create()` é usado pela web (`Main::buildContainer()`) e pelos
-scripts de terminal (`bin/bootstrap.php`):
+`App\Bootstrap\ContainerFactory::create()` é usado pela web (`Main`), pelos scripts de terminal
+(`bin/bootstrap.php`) e pelos testes (`IntegrationTestCase`):
 
 ```php
 $builder = new ContainerBuilder();
@@ -42,6 +42,7 @@ if (Application::isProduction()) {
 $builder->addDefinitions(dirname(__DIR__) . '/config/database.php');
 $builder->addDefinitions(dirname(__DIR__) . '/config/twig.php');
 $builder->addDefinitions(dirname(__DIR__) . '/config/handler.php');
+$builder->addDefinitions(dirname(__DIR__) . '/config/docker.php');
 ```
 
 - `useAutowiring(true)`: o container lê os tipos dos construtores sozinho.
@@ -84,10 +85,23 @@ Cada arquivo de `config/` devolve um array `[Classe => como criar]`.
 | `twig.php` | `Slim\Views\Twig` | Precisa da pasta `templates/`, do cache (só em produção) e das variáveis globais `auth.logged` e `global.year`. |
 | `handler.php` | `ResponseFactoryInterface` | É uma **interface**: o container não sabe qual implementação escolher. `DI\create(ResponseFactory::class)` diz: use a do `slim/psr7`. |
 | `handler.php` | `HttpErrorHandler` | `DI\autowire()` só torna explícito o autowiring; o construtor do `ErrorHandler` do Slim pede o `ResponseFactoryInterface` acima. |
+| `docker.php` | `DockerClient` | O construtor pede um `GuzzleHttp\ClientInterface` (uma interface) já apontado para o daemon. A closure pede o `DockerClientFactory`, que descobre o daemon, e entrega o cliente pronto. |
+
+### Trocar uma peça nos testes
+
+Como tudo vem do container, um teste pode **substituir uma peça antes de usar o app**:
+
+```php
+$this->container->set(DockerClient::class, new DockerClient($clienteFalso));
+```
+
+Daí em diante, quem pedir um `DockerClient` (o `DashboardService`, e por ele o controller) recebe o
+falso. É o que o `fakeDocker()` do `IntegrationTestCase` faz (ver [testing.md](testing.md)). Só
+funciona porque ninguém mais faz `new DockerClient()` por conta própria.
 
 ### Os controllers e o Slim
 
-O `php-di/slim-bridge` (`Bridge::create($container)` em `Main::createApp()`) faz duas coisas:
+O `php-di/slim-bridge` (`Bridge::create($container)` em `AppFactory::create()`) faz duas coisas:
 
 1. O Slim pede ao container o controller da rota (`[UserController::class, 'login']`).
 2. Os parâmetros do **método** são preenchidos pelo nome e pelo tipo: `$request`, `$response` e,
@@ -95,10 +109,9 @@ O `php-di/slim-bridge` (`Bridge::create($container)` em `Main::createApp()`) faz
 
 ## Pegadinhas
 
-- **Receber e não usar.** O `DashboardController` recebe um `DashboardService` e faz
-  `new DashboardService()` mesmo assim; o service faz `new DockerClient()`. Isso derrota o
-  propósito: o teste não consegue entregar um `DockerClient` falso. A regra (`code-style.md`) é
-  usar o que foi injetado; a correção é a etapa 7.
+- **Não faça `new` de um colaborador.** Se o `DashboardService` fizesse `new DockerClient()` (como
+  fazia até a etapa 7a), o `container->set()` do teste não teria efeito: o service ignoraria a peça
+  trocada. Receba pelo construtor.
 - **Mesma instância na requisição.** `$container->get(X::class)` devolve sempre o mesmo objeto
   durante a requisição. Uma classe que guarda estado numa propriedade compartilha esse estado com
   todo mundo que a recebeu.

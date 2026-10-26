@@ -33,9 +33,16 @@ sessão atualiza este arquivo; quem começar lê este arquivo primeiro.
   começou antes da etapa 6: `.claude/arch-explain/just.md` e `migrations.md`. A linha
   `xdebug.log` saiu do `php.ini` (fpm e cli disputavam o `/tmp/xdebug.log`).
 - **Etapa 5 (skill `modernize-php`):** descartada em 2026-10-23 por decisão do dev — só rodaria
-  uma vez. A etapa 9 gera o relatório direto (critérios no plano), e a regra "clareza > código
-  rebuscado" entra no `code-style.md` na etapa 6.
-- **Etapa 6 (documentação do estado atual):** entregue em 2026-10-23, aguardando conferência.
+  uma vez. A regra "clareza > código rebuscado" entrou no `code-style.md` na etapa 6.
+- **Plano simplificado (MVP) em 2026-10-26, por decisão do dev:** etapa 7 = 7a (base) + 7b (~8
+  testes de rota, sem unitários nem `known-bug`); etapa 8 escreve um teste por bug antes de
+  corrigir; 9+10 viram `cs-fix` + zerar o `stan`; 11+12 fundidas (direção escolhida por
+  descrição); 13 é um overlay próprio; 14 usa **dois papéis fixos** com mapa enum no código (sem
+  tabelas de permissão); 16 descartada; 15 e 17 reduzidas. Numeração original mantida.
+- **Etapa 7a:** entregue em 2026-10-26, aguardando conferência. `DockerClientFactory` faz a
+  descoberta do daemon, o `DockerClient` só recebe um `ClientInterface` (`config/docker.php`), e
+  `App\Bootstrap\AppFactory` monta o app para o `Main` e para os testes.
+- **Etapa 6 (documentação do estado atual):** confirmada em 2026-10-26.
   `arch-explain/`: `request-flow`, `di`, `auth`, `docker-client`, `error-handling`, `frontend`,
   `infra` (além de `just` e `migrations`). Decisões do dev (2026-10-23): as
   specs de `docs/specs/` são escritas no início de cada etapa de feature (14–18), e o
@@ -65,6 +72,8 @@ O plano tem o detalhe; aqui só o resumo.
 - **MVP sempre:** o mínimo de arquivos e classes que resolve a etapa de hoje.
 - **Explicações com analogias**, curtas, começando pela analogia e depois ligando ao código. Em
   assunto novo para o dev, conceito antes do código.
+- **Documentação enxuta** (pedido do dev em 2026-10-26): manter as seções, mas curtas; só o que o
+  leitor precisa, sem passo a passo linha a linha.
 - **Código claro para júnior e pleno, com poucos comentários** (só o porquê que o código não
   mostra).
 - **CodeGraph primeiro** (`codegraph_explore`) para entender ou localizar código; `Read` só para o

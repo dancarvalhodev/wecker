@@ -10,8 +10,9 @@ public/index.php → Bootstrap\Main → routes/web.php → Controller → Servic
 ## Bootstrap
 
 - `www/public/index.php` — entrypoint. Starts the PHP session (`session_start()`), requires the Composer autoloader, and runs `new Main()->run()`.
-- `App\Bootstrap\Main` (`www/bootstrap/Main.php`) — orchestrates startup in the constructor: `loadConfigs()` (vlucas/phpdotenv `safeLoad` of `www/.env`), `buildContainer()` (delegates to `ContainerFactory::create()`), `createApp()` (via `php-di/slim-bridge` `Bridge::create`), `registerMiddlewares()`, `registerRoutes()`.
-- `App\Bootstrap\ContainerFactory` — builds the PHP-DI container; shared by the web entrypoint and the CLI scripts.
+- `App\Bootstrap\Main` (`www/bootstrap/Main.php`) — the constructor runs `loadConfigs()` (vlucas/phpdotenv `safeLoad` of `www/.env`) and builds the app with `AppFactory::create(ContainerFactory::create())`.
+- `App\Bootstrap\ContainerFactory` — builds the PHP-DI container; shared by the web entrypoint, the CLI scripts and the tests.
+- `App\Bootstrap\AppFactory` — builds the Slim app on a given container (`php-di/slim-bridge` `Bridge::create`, error middleware + `HttpErrorHandler`, `routes/web.php`); shared by `Main` and `IntegrationTestCase`.
 - `www/bin/*.php` — CLI entrypoints (`migrate.php`, `admin-create.php`). `bin/bootstrap.php` loads the autoloader and `.env` and returns the container; the scripts only parse arguments, call a class from `src/` and print through `App\Console\Terminal`. Keep logic out of `bin/`.
 - `App\Bootstrap\App` (`www/bootstrap/App.php`) — static env gates `isProduction()/isTesting()/isDevelopment()` keyed off `getenv('APP_ENV')`. Production enables DI compilation and proxy caching under `www/storage/cache`; Twig cache is likewise only enabled in production.
 
@@ -22,6 +23,7 @@ public/index.php → Bootstrap\Main → routes/web.php → Controller → Servic
   - `config/database.php` — the app's Doctrine DBAL `Connection`, created by `App\Database\ConnectionFactory` from the `DB_*` env vars (`pdo_pgsql`).
   - `config/twig.php` — builds `Slim\Views\Twig` pointed at `www/templates`; registers globals `auth.logged` and `global.year`.
   - `config/handler.php` — binds `ResponseFactoryInterface` and autowires `HttpErrorHandler`.
+  - `config/docker.php` — `DockerClient` built from `DockerClientFactory::create()` (see Docker integration).
 
 ## Routing
 
@@ -43,7 +45,9 @@ Session-based. `AuthService` reads/writes `$_SESSION['user_id']` (`login()` call
 
 ## Docker integration
 
-`App\Service\Api\DockerClient` wraps a Guzzle client against Docker Engine API **`v1.54`**. On construction it auto-detects the daemon by probing `_ping` across candidates **in order**, caching the winning client in a `static`:
+`App\Service\Api\DockerClient` receives a `GuzzleHttp\ClientInterface` in its constructor and calls the Docker Engine API **`v1.54`** with `request()` (the interface has no `get()`/`post()`). `DashboardService` receives the `DockerClient` by constructor injection; tests swap it via `IntegrationTestCase::fakeDocker()`.
+
+`App\Service\Api\DockerClientFactory::create()` (wired in `config/docker.php`) auto-detects the daemon by probing `_ping` across candidates **in order**, once per request that resolves a `DockerClient`:
 
 1. TCP `http://host.docker.internal:2375` (Docker Desktop from inside a container)
 2. TCP `http://127.0.0.1:2375` (WSL2 / Docker Desktop with "Expose daemon without TLS")

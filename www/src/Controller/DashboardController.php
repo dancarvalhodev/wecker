@@ -16,13 +16,13 @@ use Twig\Error\SyntaxError;
 class DashboardController extends AbstractController
 {
     /** @var DashboardService $dashboardService */
-    private $dashboardService;
+    private DashboardService $dashboardService;
 
     public function __construct(Twig $twig, DashboardService $dashboardService)
     {
         parent::__construct($twig);
 
-        $this->dashboardService = new DashboardService();
+        $this->dashboardService = $dashboardService;
     }
 
     /**

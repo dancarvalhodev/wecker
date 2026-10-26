@@ -2,85 +2,20 @@
 
 namespace App\Service\Api;
 
-use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
-use RuntimeException;
-use Throwable;
 
 class DockerClient
 {
-    /** @var ?Client */
-    private ?Client $client;
-
-    /** @var string */
-    private const string VERSION = 'v1.54';
-
-    /** @var ?Client */
-    private static ?Client $cached = null;
+    /** @var ClientInterface */
+    private ClientInterface $client;
 
     /**
-     * @return void
+     * @param ClientInterface $client already pointing at the daemon's versioned API (see DockerClientFactory)
      */
-    public function __construct()
+    public function __construct(ClientInterface $client)
     {
-        if (self::$cached) {
-            $this->client = self::$cached;
-
-            return;
-        }
-
-        $this->client = self::$cached = $this->detectClient();
-    }
-
-    /**
-     * @return Client
-     */
-    private function detectClient(): Client
-    {
-        $candidates = [
-            // TCP (WSL2 / Docker Desktop)
-            [
-                'base_uri' => 'http://host.docker.internal:2375/' . self::VERSION . '/',
-            ],
-            [
-                'base_uri' => 'http://127.0.0.1:2375/' . self::VERSION . '/',
-            ],
-
-            // Socket (Linux)
-            [
-                'base_uri' => 'http://localhost/' . self::VERSION . '/',
-                'curl' => [
-                    CURLOPT_UNIX_SOCKET_PATH => '/var/run/docker.sock',
-                ],
-            ],
-        ];
-
-        foreach ($candidates as $config) {
-            $config['timeout'] = 5;
-            $config['connect_timeout'] = 5;
-
-            $client = new Client($config);
-
-            if ($this->isAlive($client)) {
-                return $client;
-            }
-        }
-
-        throw new RuntimeException('Docker não acessível');
-    }
-
-    /**
-     * @param Client $client
-     * @return bool
-     */
-    private function isAlive(Client $client): bool
-    {
-        try {
-            $res = $client->get('_ping', ['timeout' => 1]);
-            return trim((string)$res->getBody()) === 'OK';
-        } catch (Throwable) {
-            return false;
-        }
+        $this->client = $client;
     }
 
     /**
@@ -88,7 +23,7 @@ class DockerClient
      */
     public function getContainers(): array|null
     {
-        $res = $this->client->get('containers/json', [
+        $res = $this->client->request('GET', 'containers/json', [
             'query' => [
                 'all' => true,
             ],
@@ -102,7 +37,7 @@ class DockerClient
      */
     public function startContainer(string $id): int
     {
-        $res = $this->client->post("containers/$id/start");
+        $res = $this->client->request('POST', "containers/$id/start");
 
         return $res->getStatusCode();
     }
@@ -112,7 +47,7 @@ class DockerClient
      */
     public function stopContainer(string $id): int
     {
-        $res = $this->client->post("containers/$id/stop");
+        $res = $this->client->request('POST', "containers/$id/stop");
 
         return $res->getStatusCode();
     }
@@ -122,7 +57,7 @@ class DockerClient
      */
     public function logs(string $id): array
     {
-        $res = $this->client->get("containers/$id/logs", [
+        $res = $this->client->request('GET', "containers/$id/logs", [
             'query' => [
                 'stdout' => true,
                 'stderr' => true,

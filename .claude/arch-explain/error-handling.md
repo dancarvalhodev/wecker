@@ -22,15 +22,15 @@ O **balcão de reclamações** de uma loja.
 
 ## Como funciona aqui
 
-### A ligação (`Main::registerMiddlewares()`)
+### A ligação (`AppFactory::create()`)
 
 ```php
-$errorMiddleware = $this->app->addErrorMiddleware(
+$errorMiddleware = $app->addErrorMiddleware(
     !Application::isProduction(), // displayErrorDetails
     true, // logErrors
-    true  // logErrorDetails
+    true, // logErrorDetails
 );
-$errorMiddleware->setDefaultErrorHandler($this->container->get(HttpErrorHandler::class));
+$errorMiddleware->setDefaultErrorHandler($container->get(HttpErrorHandler::class));
 ```
 
 O middleware de erro envolve todas as rotas: qualquer exceção não capturada lá dentro termina nele.

@@ -16,17 +16,36 @@ O **interfone para o prédio do Docker**.
 - O prédio (o daemon) atende por mais de uma entrada. Pode haver um **interfone na rua** (TCP,
   porta 2375) ou uma **linha interna** (o socket `/var/run/docker.sock`), que só funciona para quem
   está dentro.
-- Ao chegar, o `DockerClient` **testa os interfones em ordem**: aperta e diz "alô?" (`_ping`). O
-  primeiro que responde "OK" é o que ele usa.
+- Antes do primeiro pedido, um **zelador** (o `DockerClientFactory`) **testa os interfones em
+  ordem**: aperta e diz "alô?" (`_ping`). O primeiro que responde "OK" é entregue ao `DockerClient`,
+  que só faz os pedidos por ele.
 - Cada pedido é uma frase padronizada da API: "inicie o apartamento X" é
   `POST /containers/X/start`. O prédio responde com um código: 204 "feito", 304 "já estava assim",
   404 "não conheço esse apartamento".
 
 ## Como funciona aqui
 
+### Duas classes: quem descobre e quem chama
+
+- **`DockerClientFactory::create()`** descobre por qual entrada o daemon responde e devolve um
+  `GuzzleHttp\ClientInterface` já apontado para ela.
+- **`DockerClient`** só recebe esse cliente pronto no construtor e faz as chamadas.
+
+Quem liga as duas é o `config/docker.php`, quando alguém pede um `DockerClient` ao container de
+DI:
+
+```php
+DockerClient::class => function (DockerClientFactory $factory) {
+    return new DockerClient($factory->create());
+},
+```
+
+A separação existe para os testes: eles entregam ao `DockerClient` um cliente falso, que responde
+o que o teste mandar, sem Docker nenhum (ver [testing.md](testing.md)).
+
 ### A descoberta do daemon
 
-No construtor, `detectClient()` cria um `GuzzleHttp\Client` para cada candidato e testa
+`DockerClientFactory::create()` cria um `GuzzleHttp\Client` para cada candidato e testa
 `GET _ping`, que deve responder `OK`:
 
 | Ordem | `base_uri` | Quando funciona |
@@ -53,7 +72,7 @@ e o `bin/php/entrypoint.sh` põe o usuário `www-data` (o do php-fpm) no grupo d
 | `stopContainer($id)` | `POST containers/$id/stop` | Só o código HTTP |
 | `logs($id)` | `GET containers/$id/logs?stdout=1&stderr=1&tail=10` | `['statusCode' => ..., 'body' => ...]` |
 
-A versão da API vem da constante `VERSION = 'v1.54'`, no começo de toda URL. Fixar a versão
+A versão da API vem da constante `DockerClientFactory::VERSION = 'v1.54'`, no começo de toda URL. Fixar a versão
 garante que as respostas tenham sempre o mesmo formato, mesmo se o Docker for atualizado.
 
 ### O que o `DashboardService` faz com isso
@@ -74,9 +93,9 @@ garante que as respostas tenham sempre o mesmo formato, mesmo se o Docker for at
 - **O 404 nunca chega ao `match`.** O Guzzle, por padrão (`http_errors`), **lança exceção** em
   respostas 4xx e 5xx. Um container inexistente gera uma `ClientException`, que vira 500 no
   `HttpErrorHandler`, e não "Container not found". Só o 204 e o 304 chegam ao `match`.
-- **O cache `static` não dura entre requisições.** `self::$cached` evita testar os candidatos de
-  novo *na mesma requisição*. No php-fpm, cada requisição começa com as `static` zeradas, então a
-  descoberta (até três `_ping`) roda em toda requisição.
+- **A descoberta roda em toda requisição que usa o Docker.** O container de DI monta o
+  `DockerClient` uma vez por requisição, e o PHP não guarda nada entre requisições. São até três
+  `_ping` por requisição do dashboard (no Linux, os dois primeiros falham rápido).
 - **Lista vazia vira erro.** Sem nenhum container, `getContainers()` devolve `[]`, e o `if
   (!$containers)` do service lança "Docker containers not found": o dashboard quebra (problema 8).
 - **Portas montadas errado.** `Ports[0]->PublicPort . ':' . Ports[1]->PrivatePort` mistura duas
@@ -87,8 +106,9 @@ garante que as respostas tenham sempre o mesmo formato, mesmo se o Docker for at
   resposta final é montada pelo controller como JSON.
 - **Filtrar pela imagem é frágil.** Uma imagem reconstruída deixa o container antigo apontando
   para um `sha256:...` sem nome, que não contém `wecker` e passa a aparecer na tabela.
-- **`new DockerClient()` em todo método.** O service cria o cliente por conta própria, então não dá
-  para trocar por um falso nos testes (problema 13, etapa 7).
+- **`request('GET', ...)`, não `get(...)`.** O `ClientInterface` do Guzzle só declara `request()`;
+  os atalhos `get()`/`post()` existem só na classe `Client`. Como o `DockerClient` recebe a
+  interface, usa `request()`.
 
 ## Comandos úteis
 
