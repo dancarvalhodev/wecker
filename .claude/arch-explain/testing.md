@@ -18,7 +18,7 @@ Docker responde o que o teste programou), e cada voo começa do mesmo ponto (rol
 2. **`IntegrationTestCase`**, antes de cada teste: sessão, container e app novos, transação
    aberta e Docker falso sem respostas. Depois: `rollBack()`.
 3. Os testes de rota ficam em `UserRoutesTest` e `DashboardRoutesTest` e registram o
-   comportamento **atual**, inclusive bugs (ex.: rota inexistente → 500), que mudam na etapa 8.
+   comportamento **atual**, inclusive bugs (ex.: rota inexistente → 500), que mudam nas etapas 8 e 9.
 
 | Ajudante | Para quê |
 |---|---|

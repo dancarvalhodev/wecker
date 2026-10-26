@@ -7,7 +7,7 @@ tabela, adicionar coluna, inserir dados fixos. O banco guarda quais migrações 
 programa (o *runner*) aplica só as que faltam, em ordem.
 
 O problema que isso resolve: antes, o schema vivia num `docs/database.sql` que cada pessoa
-carregava à mão uma vez. Quando o schema mudasse (as permissões da etapa 14, por exemplo), não
+carregava à mão uma vez. Quando o schema mudasse (os usuários da etapa 12, por exemplo), não
 haveria como saber o que cada banco já tinha, e a saída seria apagar e recarregar, perdendo os
 dados. Com migrações, cada mudança vira um arquivo novo, e `just migrate` leva qualquer banco, novo
 ou antigo, até a versão atual.
@@ -155,7 +155,7 @@ Para isso funcionar, duas coisas mudaram no código de usuários:
   `$user->getRoleId()`. Para o cadastro, o valor é o mesmo de antes.
 
 O `UserRepo::hydrate()` ainda monta todo usuário lido do banco como `ROLE_USER`. Não afeta nada
-hoje, porque ninguém consulta o papel, mas precisa ser corrigido nas etapas de permissões (14–15).
+hoje, porque ninguém consulta o papel, mas precisa ser corrigido na etapa de usuários e papéis (12).
 
 ### Por que o `just` espera o Postgres (`_wait-db`)
 

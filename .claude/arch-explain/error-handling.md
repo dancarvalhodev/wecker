@@ -70,7 +70,7 @@ Com `logErrors` e `logErrorDetails` ligados, o Slim grava a mensagem e o stack t
 - **`HttpException` é a classe errada.** O `use HttpException;` aponta para uma classe global da
   extensão PECL `http`, que nem está instalada. A do Slim é `Slim\Exception\HttpException`. Por
   isso, um 404 (rota inexistente) ou um 405 (método errado) do Slim cai no "qualquer outra" e vira
-  **500** (problema 5 do plano, etapa 8).
+  **500** (problema 5 do plano, etapa 9).
 - **`error` muda de tipo.** É array nos casos tipados e texto no 500. Quem lê no JavaScript precisa
   tratar os dois.
 - **O JS procura no lugar errado.** `login.js` e `register.js` leem `response.messages` no callback

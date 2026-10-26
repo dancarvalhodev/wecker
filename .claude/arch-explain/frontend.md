@@ -111,7 +111,7 @@ a checagem do navegador é conforto, não segurança.
   (problema 4, etapa 8). Os logs não têm esse problema, porque usam `.text()`.
 - **`Create.init()` não existe.** O `dashboard/index.html.twig` chama um módulo `Create` que não
   foi escrito, e isso gera um erro no console em toda abertura do dashboard (problema 14; o módulo
-  nasce na etapa 18).
+  nasce na etapa 11).
 - **Erros de validação não aparecem.** Ver [error-handling.md](error-handling.md): o JS procura
   `response.messages` no callback errado.
 - **`'arroz'`.** Se o log vier vazio, o modal mostra a palavra `arroz`, um placeholder esquecido

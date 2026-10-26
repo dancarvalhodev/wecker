@@ -81,10 +81,10 @@ navegador, mas aponta para nada.
 
 - **O nome é `AuthMidleware`, com um `d` só.** Está assim em todo lugar; não corrija em um ponto só.
 - **A sessão guarda só o id.** Um usuário apagado do banco continua "logado" até a sessão expirar,
-  porque ninguém confere se o id ainda existe. A etapa 14 passa a recarregar o usuário a cada
+  porque ninguém confere se o id ainda existe. A etapa 12 passa a recarregar o usuário a cada
   requisição.
 - **Ninguém confere o papel.** Qualquer usuário logado faz tudo no dashboard, e o `UserRepo::hydrate()`
-  ainda monta todo usuário como `ROLE_USER` (etapas 14–15).
+  ainda monta todo usuário como `ROLE_USER` (etapa 12).
 - **O cadastro é público e não valida.** `RegisterValidator::validate()` *devolve* os erros, e o
   `UserController::register()` ignora o retorno (problemas 2 e 11 do plano).
 - **A mensagem de erro do login não aparece.** O 422 cai no callback `error` do `login.js`, que

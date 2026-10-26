@@ -119,7 +119,8 @@ anteriores.
 
 ## 5. Entregar a etapa
 
-Ao terminar, encerre o turno com um relatório neste formato:
+Ao terminar, encerre o turno com um relatório **curto** neste formato: poucas linhas por seção,
+só o que o dev precisa para conferir e decidir.
 
 ```
 **Etapa N de T — <título>: concluída**
@@ -148,11 +149,10 @@ Está tudo correto? Posso seguir para a etapa N+1 — <título>?
 Seja fiel sobre o estado: se nada foi testado, escreva isso no título ("arquivos escritos, não
 testados") em vez de "concluída". O dev decide com base nesse relatório.
 
-A documentação faz parte da etapa. `.claude/arch-explain/` tem um documento por assunto, com o
-porquê das decisões. Ao mudar o comportamento de uma dessas áreas, atualize o documento na
-mesma etapa. Enquanto a pasta não existir (ela nasce na etapa 6 do plano v2), omita a seção
-"Documentação" do relatório. As dúvidas que o dev levantar durante a conferência também entram
-no documento, quando ele concordar.
+`.claude/arch-explain/` tem um documento enxuto por assunto. Atualize um documento **só quando a
+mudança da etapa invalidar o que está escrito** nele; não acrescente detalhes novos por conta
+própria. As dúvidas que o dev levantar durante a conferência entram no documento quando ele
+concordar.
 
 Depois da pergunta, **pare**. Não comece a etapa seguinte no mesmo turno e não a prepare "para
 adiantar".

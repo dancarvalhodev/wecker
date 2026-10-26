@@ -3,58 +3,28 @@
 Resumo para continuar o desenvolvimento em outro computador (ou voltar a este). Quem terminar uma
 sessão atualiza este arquivo; quem começar lê este arquivo primeiro.
 
-Última atualização: 2026-10-23.
+Última atualização: 2026-10-26.
 
 ## Onde paramos
 
-- **Plano em execução:** `.claude/plans/v2.md` (19 etapas, branch `feature/v2`), executado com a
-  skill `modo-codando` (`.claude/skills/modo-codando/SKILL.md`).
-- **Etapa 1 (skill `modo-codando` + este arquivo):** confirmada em 2026-10-20.
-- **Etapa 2 (ferramentas de qualidade):** confirmada em 2026-10-20.
-  `docker compose exec php composer test | stan | cs | cs:fix` funcionam. Estado de partida:
-  testes verdes (1 placeholder), `stan` com 39 erros (nível 6) e `cs` com 27 de 29 arquivos a
-  corrigir. Os dois devem ser zerados nas etapas 7–10. Guzzle fixado em `^8.3` (estável), por
-  decisão do dev. O `www/composer.lock` passou a ser versionado (saiu do `.gitignore`).
-- **Etapa 3 (`run.sh` aprimorado → `justfile`):** confirmada em 2026-10-21. Por decisão do dev,
-  o `run.sh` foi trocado por um `justfile` ([just](https://just.systems), `sudo apt install
-  just`). O `just` não aceita `:` em nomes: os comandos são `cs-fix`, `db-reset` e
-  `admin-create`.
-- **Etapa 4 (migrações):** confirmada em 2026-10-23. Migrações em
-  `www/database/migrations/`, lógica em `App\Database\Migrator` e `ConnectionFactory`, I/O de
-  terminal em `App\Console\Terminal`, container compartilhado em
-  `App\Bootstrap\ContainerFactory`. `www/bin/migrate.php` (`--fresh` recria o banco) e
-  `www/bin/admin-create.php` (`--if-missing` usado no `just install`) são só portas de entrada:
-  por pedido do dev, a lógica fica em classes de `src/`, e não em scripts soltos.
-- **Etapa 4b (incluída em 2026-10-23, a pedido do dev):** PHP em Ubuntu 24.04 + PPA do Ondřej e
-  nginx → Caddy. Decisões: só HTTP local, logs do Caddy no stdout, `PORT_NGINX` → `PORT_HTTP`,
-  código em `/var/www/html`. Confirmada em 2026-10-23. `just migrate`
-  aplica no banco do app e no `wecker_test`. Por decisão do dev, o `admin-create` **não tem
-  validação** (MVP); o `UNIQUE` do e-mail é a única barreira. A pedido do dev, a documentação
-  começou antes da etapa 6: `.claude/arch-explain/just.md` e `migrations.md`. A linha
-  `xdebug.log` saiu do `php.ini` (fpm e cli disputavam o `/tmp/xdebug.log`).
-- **Etapa 5 (skill `modernize-php`):** descartada em 2026-10-23 por decisão do dev — só rodaria
-  uma vez. A regra "clareza > código rebuscado" entrou no `code-style.md` na etapa 6.
-- **Plano simplificado (MVP) em 2026-10-26, por decisão do dev:** etapa 7 = 7a (base) + 7b (~8
-  testes de rota, sem unitários nem `known-bug`); etapa 8 escreve um teste por bug antes de
-  corrigir; 9+10 viram `cs-fix` + zerar o `stan`; 11+12 fundidas (direção escolhida por
-  descrição); 13 é um overlay próprio; 14 usa **dois papéis fixos** com mapa enum no código (sem
-  tabelas de permissão); 16 descartada; 15 e 17 reduzidas. Numeração original mantida.
-- **Etapa 7a:** confirmada em 2026-10-26. 7b (8 testes de rota) entregue em 2026-10-26,
-  aguardando conferência. `DockerClientFactory` faz a
-  descoberta do daemon, o `DockerClient` só recebe um `ClientInterface` (`config/docker.php`), e
-  `App\Bootstrap\AppFactory` monta o app para o `Main` e para os testes.
-- **Etapa 6 (documentação do estado atual):** confirmada em 2026-10-26.
-  `arch-explain/`: `request-flow`, `di`, `auth`, `docker-client`, `error-handling`, `frontend`,
-  `infra` (além de `just` e `migrations`). Decisões do dev (2026-10-23): as
-  specs de `docs/specs/` são escritas no início de cada etapa de feature (14–18), e o
-  `arch-explain/testing.md` vai para a etapa 7.
+- **Plano:** `.claude/plans/v2.md` (branch `feature/v2`), executado com a skill `modo-codando`.
+  Revisado em 2026-10-26 (MVP): restam as etapas **8 Segurança essencial**, **9 Bugs visíveis**,
+  **10 Revamp visual**, **11 Criar container pela UI** e **12 Usuários e papéis fixos**.
+- **Próxima:** etapa 8.
+- **Feito (1–7):** skill `modo-codando`; PHPUnit/PHPStan/PHP-CS-Fixer; `justfile`; migrações
+  (`Migrator`, `just migrate`, `just admin-create`); PHP em Ubuntu 24.04 + Caddy; `arch-explain/`;
+  injeção do Docker (`DockerClientFactory`, `config/docker.php`, `AppFactory`) e 8 testes de rota
+  com `IntegrationTestCase` (`fakeDocker()`, `actingAs()`, `wecker_test` recriado a cada execução).
+- **Decisões que mudaram a entrevista:** papéis fixos (Admin/User) em vez de permissões granulares;
+  CSRF via cookie `SameSite=Strict`; `/register` sai já na etapa 8; sem etapa própria de
+  `cs-fix`/PHPStan (cada etapa limpa os arquivos que toca).
 
 ## Decisões da entrevista (2026-10-19)
 
 O plano tem o detalhe; aqui só o resumo.
 
-- **Permissões granulares:** tabela `permissions` + `role_permissions`, editável pela UI. As chaves
-  são fixas no código (enum); a UI só muda quais papéis têm quais chaves.
+- **Permissões:** ~~granulares, editáveis pela UI~~ → papéis fixos Admin/User (revisão de
+  2026-10-26).
 - **Cadastro:** só o admin cria usuários; o `/register` público sai.
 - **Criar container (essencial):** imagem (pull se faltar), nome, portas, env vars, restart policy,
   "iniciar após criar".
@@ -75,6 +45,8 @@ O plano tem o detalhe; aqui só o resumo.
   assunto novo para o dev, conceito antes do código.
 - **Documentação enxuta** (pedido do dev em 2026-10-26): manter as seções, mas curtas; só o que o
   leitor precisa, sem passo a passo linha a linha.
+- **Relatório de fim de etapa curto** (2026-10-26): poucas linhas por seção, só o essencial.
+- **`arch-explain/` só é atualizado quando a mudança invalida o que está escrito** (2026-10-26).
 - **Código claro para júnior e pleno, com poucos comentários** (só o porquê que o código não
   mostra).
 - **CodeGraph primeiro** (`codegraph_explore`) para entender ou localizar código; `Read` só para o
@@ -97,11 +69,11 @@ O plano tem o detalhe; aqui só o resumo.
 ## Pendências conhecidas
 
 - **Containers depois de reiniciar a máquina (visto em 2026-10-21 e 2026-10-23):** `php` e
-  `nginx` ficam `Exited (127)` sem log, e o `postgres` sobe mas grava fora de `data/postgres`
+  `nginx` (hoje `caddy`) ficam `Exited (127)` sem log, e o `postgres` sobe mas grava fora de `data/postgres`
   (as migrações feitas no dia 21 não estavam lá no dia 23). Hipótese: o Docker sobe os containers
   antes de as pastas do WSL estarem montadas. `just up` resolve na hora; falta investigar a causa.
 - **Mount de arquivo único no Docker Desktop/WSL:** depois de editar `config/php/php.ini` ou o
   `Caddyfile`, `docker compose restart` falha; use `docker compose up -d --force-recreate <serviço>`.
 
 - Os problemas encontrados na análise da v1 estão listados (1–19) no início do plano e são
-  tratados nas etapas 7, 8 e 10.
+  tratados nas etapas 8 e 9.
