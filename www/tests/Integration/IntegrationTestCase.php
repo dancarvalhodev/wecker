@@ -35,6 +35,7 @@ abstract class IntegrationTestCase extends TestCase
 
     protected function setUp(): void
     {
+        session_start();
         $_SESSION = [];
 
         $this->container = ContainerFactory::create();
@@ -50,7 +51,7 @@ abstract class IntegrationTestCase extends TestCase
     protected function tearDown(): void
     {
         $this->connection->rollBack();
-        $_SESSION = [];
+        session_destroy();
     }
 
     /**

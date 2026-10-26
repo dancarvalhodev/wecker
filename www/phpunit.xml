@@ -20,5 +20,8 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing" force="true"/>
+        <!-- Real (Redis) session without cookies or headers, so session_regenerate_id() works in the CLI -->
+        <ini name="session.use_cookies" value="0"/>
+        <ini name="session.cache_limiter" value=""/>
     </php>
 </phpunit>

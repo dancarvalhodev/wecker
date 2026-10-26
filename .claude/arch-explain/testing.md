@@ -15,8 +15,10 @@ Docker responde o que o teste programou), e cada voo começa do mesmo ponto (rol
 
 1. **`tests/bootstrap.php`** roda uma vez: troca `DB_NAME` para `wecker_test` e recria esse banco
    a partir das migrações.
-2. **`IntegrationTestCase`**, antes de cada teste: container e app novos, transação aberta e
-   Docker falso sem respostas. Depois: `rollBack()`.
+2. **`IntegrationTestCase`**, antes de cada teste: sessão, container e app novos, transação
+   aberta e Docker falso sem respostas. Depois: `rollBack()`.
+3. Os testes de rota ficam em `UserRoutesTest` e `DashboardRoutesTest` e registram o
+   comportamento **atual**, inclusive bugs (ex.: rota inexistente → 500), que mudam na etapa 8.
 
 | Ajudante | Para quê |
 |---|---|
@@ -37,7 +39,10 @@ $this->assertSame(200, $response->getStatusCode());
 - **Chame `fakeDocker()` antes da requisição**, com uma resposta para cada chamada ao Docker; se
   faltar, o Guzzle lança `OutOfBoundsException`.
 - **Cada execução apaga o `wecker_test`.** Não guarde nada nele.
-- **Não há sessão de verdade:** `$_SESSION` é um array comum, zerado a cada teste.
+- **Erro esperado? Chame `$this->expectErrorLog()`.** O Slim registra todo 4xx/5xx com
+  `error_log()`, e o PHPUnit imprime esse log no meio da saída se o teste não o declarar.
+- **A sessão é real (Redis), mas sem cookie** (`phpunit.xml`): aberta no `setUp`, destruída no
+  `tearDown`.
 
 ## Comandos úteis
 

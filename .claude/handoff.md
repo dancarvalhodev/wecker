@@ -39,7 +39,8 @@ sessão atualiza este arquivo; quem começar lê este arquivo primeiro.
   corrigir; 9+10 viram `cs-fix` + zerar o `stan`; 11+12 fundidas (direção escolhida por
   descrição); 13 é um overlay próprio; 14 usa **dois papéis fixos** com mapa enum no código (sem
   tabelas de permissão); 16 descartada; 15 e 17 reduzidas. Numeração original mantida.
-- **Etapa 7a:** entregue em 2026-10-26, aguardando conferência. `DockerClientFactory` faz a
+- **Etapa 7a:** confirmada em 2026-10-26. 7b (8 testes de rota) entregue em 2026-10-26,
+  aguardando conferência. `DockerClientFactory` faz a
   descoberta do daemon, o `DockerClient` só recebe um `ClientInterface` (`config/docker.php`), e
   `App\Bootstrap\AppFactory` monta o app para o `Main` e para os testes.
 - **Etapa 6 (documentação do estado atual):** confirmada em 2026-10-26.
