@@ -1,65 +1,42 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Orientações para o Claude Code (claude.ai/code) neste repositório.
 
-## What this is
+## O que é
 
-Wecker is a Portainer-inspired web UI for managing Docker containers. A PHP (Slim 4) app talks to the Docker Engine HTTP API to list/start/stop containers and read logs, behind a session-based login. The whole stack (caddy, php-fpm, postgres, redis) runs via Docker Compose. Application code lives under `www/`.
+Wecker é uma interface web, inspirada no Portainer, para gerenciar containers Docker. Um app PHP (Slim 4) fala com a API HTTP do Docker Engine para listar, iniciar e parar containers e ler logs, atrás de um login por sessão. A stack inteira (caddy, php-fpm, postgres, redis) roda no Docker Compose. O código da aplicação fica em `www/`.
 
-## Commands
+## Comandos
 
-All commands run through the `justfile` ([just](https://just.systems), from repo root). `just` with no args lists them:
-
-```bash
-just install          # first run: setup + up + composer install + migrate + create admin
-just setup            # copy env-example -> .env and www/env-example -> www/.env
-just up               # docker compose up -d --build; app served at http://localhost
-just stop | status | logs
-just shell [service]  # sh inside a container (default: php)
-just reset            # down -v + prune project containers/images
-just nuke             # docker system prune -af --volumes (destroys ALL docker state; typed confirmation)
-```
-
-Database (schema lives in `www/database/migrations/NNN_description.sql`, applied by `www/bin/migrate.php` and tracked in `schema_migrations`):
+Tudo passa pelo `justfile` ([just](https://just.systems), na raiz). `just` sem argumentos lista as receitas:
 
 ```bash
-just migrate          # apply pending migrations to the app db and to wecker_test
-just db-reset         # drop + recreate both dbs from the migrations (asks for confirmation)
-just admin-create     # interactive: name, email, password -> user with Role::ROLE_ADMIN
+just install          # primeira vez: setup + up + composer install + migrate + criar admin
+just up | stop | status | logs
+just shell [serviço]  # sh dentro de um container (padrão: php)
+just migrate          # aplica as migrações no banco do app e no wecker_test
+just db-reset         # recria os dois bancos a partir das migrações (pede confirmação)
+just admin-create     # cria um admin (interativo)
+just test [filtro]    # PHPUnit
+just stan             # PHPStan (nível 6)
+just cs | cs-fix      # PHP-CS-Fixer (PER-CS 2.0)
 ```
 
-New migration = new numbered `.sql` file; never edit one that was already applied.
+PHP e Composer rodam **dentro do container `php`** (PHP 8.5 no Ubuntu 24.04, código em `/var/www/html`). Migração nova = arquivo `.sql` numerado novo em `www/database/migrations/`; nunca edite uma que já rodou.
 
-Composer / tests run **inside the php container** (php 8.5 on Ubuntu 24.04, code at `/var/www/html`); the recipes wrap `docker compose exec php composer ...`:
+## Antes de mexer no código
 
-```bash
-just composer <args>        # any composer command
-just test                   # all tests (phpunit.xml: Unit + Integration suites)
-just test testUnitIsWorking # single test (--filter)
-just stan                   # PHPStan (level 6, phpstan.neon)
-just cs                     # PHP-CS-Fixer check, PER-CS 2.0 (.php-cs-fixer.dist.php)
-just cs-fix                 # apply PHP-CS-Fixer fixes
-```
-
-Tests: `www/tests/bootstrap.php` rebuilds the `wecker_test` database from the migrations on every run. Integration tests extend `Tests\Integration\IntegrationTestCase` (real Slim app, one rolled-back transaction per test, Docker faked with `fakeDocker([...responses])`, login with `actingAs($id)`). See `.claude/arch-explain/testing.md`.
-
-## Detailed guidance
-
-Read the topic files under `.claude/rules/` before working in the corresponding area:
-
-- Backend architecture (request flow, layers, DI, Docker integration): @rules/architecture.md
-- PHP code style & conventions (naming, patterns, error handling): @rules/code-style.md
-- Frontend (Twig templates, jQuery page modules, DataTables/SweetAlert, JS↔API contracts): @rules/frontend.md
-
-Developer-facing explanations (pt-BR, with analogies) live in `.claude/arch-explain/` — one file per component, starting at `request-flow.md`. Update the matching file when a change alters what it describes.
+- Convenções de código: @rules/code-style.md
+- Como cada parte funciona: `.claude/arch-explain/`, um arquivo por assunto, começando por `request-flow.md` (`di`, `auth`, `docker-client`, `error-handling`, `frontend`, `infra`, `testing`, `just`, `migrations`). Leia o do assunto antes de mexer nele, e atualize-o só quando a mudança invalidar o que está escrito.
+- Plano em execução: `.claude/plans/v2.md`; onde paramos: `.claude/handoff.md`.
 
 <!-- CODEGRAPH_START -->
 ## CodeGraph
 
-In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the repo root), reach for it BEFORE grep/find or reading files when you need to understand or locate code:
+Em repositórios indexados pelo CodeGraph (existe `.codegraph/` na raiz), use-o ANTES de grep/find ou de ler arquivos para entender ou localizar código:
 
-- **MCP tool** (when available): `codegraph_explore` answers most code questions in one call — the relevant symbols' verbatim source plus the call paths between them, including dynamic-dispatch hops grep can't follow. Name a file or symbol in the query to read its current line-numbered source. If it's listed but deferred, load it by name via tool search.
-- **Shell** (always works): `codegraph explore "<symbol names or question>"` prints the same output.
+- **Ferramenta MCP** (quando disponível): `codegraph_explore` responde a maioria das perguntas numa chamada: o código-fonte literal dos símbolos relevantes e os caminhos de chamada entre eles. Cite um arquivo ou símbolo na consulta para ler o código atual com número de linha. Se estiver listada como adiada, carregue-a pelo nome na busca de ferramentas.
+- **Shell** (sempre funciona): `codegraph explore "<símbolos ou pergunta>"` imprime o mesmo resultado.
 
-If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is the user's decision.
+Se não houver `.codegraph/`, ignore o CodeGraph: indexar é decisão do usuário.
 <!-- CODEGRAPH_END -->

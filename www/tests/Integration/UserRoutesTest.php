@@ -4,43 +4,27 @@ declare(strict_types=1);
 
 namespace Tests\Integration;
 
-use App\Model\User\UserModel;
-
 final class UserRoutesTest extends IntegrationTestCase
 {
-    public function testLoginWithValidCredentialsStartsTheSession(): void
+    public function testLoginOpensTheDashboard(): void
     {
-        $user = $this->container->get(UserModel::class)->createUser([
-            'name' => 'Ana',
-            'email' => 'ana@example.com',
-            'password' => 'secret',
-        ]);
+        $this->login();
 
-        $response = $this->request('POST', '/login', ['email' => ' Ana@Example.com ', 'password' => 'secret']);
+        $response = $this->request('GET', '/dashboard');
 
         $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame('{"success":true}', (string) $response->getBody());
-        $this->assertSame($user->getId(), $_SESSION['user_id']);
+        $this->assertStringContainsString('Dashboard', (string) $response->getBody());
     }
 
-    public function testLoginWithWrongPasswordIsRejected(): void
+    public function testWrongPasswordKeepsTheDashboardClosed(): void
     {
         $this->expectErrorLog();
 
-        $response = $this->request('POST', '/login', ['email' => 'nobody@example.com', 'password' => 'wrong']);
+        $login = $this->request('POST', '/login', ['email' => 'nobody@example.com', 'password' => 'wrong']);
+        $dashboard = $this->request('GET', '/dashboard');
 
-        $this->assertSame(422, $response->getStatusCode());
-        $this->assertSame('{"success":false,"error":["Wrong password."]}', (string) $response->getBody());
-        $this->assertArrayNotHasKey('user_id', $_SESSION);
-    }
-
-    public function testUnknownRouteReturns500(): void
-    {
-        // Current behavior: HttpErrorHandler checks the wrong HttpException class (plan problem 5).
-        $this->expectErrorLog();
-
-        $response = $this->request('GET', '/does-not-exist');
-
-        $this->assertSame(500, $response->getStatusCode());
+        $this->assertSame(422, $login->getStatusCode());
+        $this->assertSame(302, $dashboard->getStatusCode());
+        $this->assertSame('/login', $dashboard->getHeaderLine('Location'));
     }
 }

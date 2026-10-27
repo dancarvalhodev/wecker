@@ -86,18 +86,6 @@ Cada arquivo de `config/` devolve um array `[Classe => como criar]`.
 | `handler.php` | `HttpErrorHandler` | `DI\autowire()` só torna explícito o autowiring; o construtor do `ErrorHandler` do Slim pede o `ResponseFactoryInterface` acima. |
 | `docker.php` | `DockerClient` | O construtor pede um `GuzzleHttp\ClientInterface` (uma interface) já apontado para o daemon. A closure pede o `DockerClientFactory`, que descobre o daemon, e entrega o cliente pronto. |
 
-### Trocar uma peça nos testes
-
-Como tudo vem do container, um teste pode **substituir uma peça antes de usar o app**:
-
-```php
-$this->container->set(DockerClient::class, new DockerClient($clienteFalso));
-```
-
-Daí em diante, quem pedir um `DockerClient` (o `DashboardService`, e por ele o controller) recebe o
-falso. É o que o `fakeDocker()` do `IntegrationTestCase` faz (ver [testing.md](testing.md)). Só
-funciona porque ninguém mais faz `new DockerClient()` por conta própria.
-
 ### Os controllers e o Slim
 
 O `php-di/slim-bridge` (`Bridge::create($container)` em `AppFactory::create()`) faz duas coisas:

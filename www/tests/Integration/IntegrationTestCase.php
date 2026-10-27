@@ -6,24 +6,24 @@ namespace Tests\Integration;
 
 use App\Bootstrap\AppFactory;
 use App\Bootstrap\ContainerFactory;
-use App\Service\Api\DockerClient;
+use App\Model\User\UserModel;
 use App\Service\Api\DockerClientFactory;
 use DI\Container;
 use Doctrine\DBAL\Connection;
-use GuzzleHttp\Client;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
+use GuzzleHttp\ClientInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Slim\App;
 use Slim\Psr7\Factory\ServerRequestFactory;
 
 /**
- * Boots the real app against wecker_test. Each test runs inside a transaction that is rolled back,
- * and Docker is replaced by a Guzzle MockHandler (see fakeDocker()).
+ * Boots the real app against wecker_test and the real Docker daemon.
+ * Each test runs inside a transaction that is rolled back, and the containers it creates are removed.
  */
 abstract class IntegrationTestCase extends TestCase
 {
+    protected const string TEST_IMAGE = 'busybox:latest';
+
     /** @var Container $container */
     protected Container $container;
 
@@ -33,8 +33,11 @@ abstract class IntegrationTestCase extends TestCase
     /** @var Connection $connection */
     protected Connection $connection;
 
-    /** @var MockHandler $docker the fake Docker; getLastRequest() shows what the app asked */
-    protected MockHandler $docker;
+    /** @var ClientInterface $docker direct access to the Docker API, for test setup only */
+    protected ClientInterface $docker;
+
+    /** @var list<string> $createdContainers */
+    private array $createdContainers = [];
 
     protected function setUp(): void
     {
@@ -47,41 +50,57 @@ abstract class IntegrationTestCase extends TestCase
         $this->connection = $this->container->get(Connection::class);
         $this->connection->beginTransaction();
 
-        // With no queued responses, any unexpected Docker call fails the test.
-        $this->fakeDocker([]);
+        $this->docker = new DockerClientFactory()->create();
     }
 
     protected function tearDown(): void
     {
+        foreach ($this->createdContainers as $id) {
+            $this->docker->request('DELETE', "containers/$id", ['query' => ['force' => 'true']]);
+        }
+
         $this->connection->rollBack();
         session_destroy();
     }
 
     /**
-     * Makes the app talk to a fake Docker that answers with $responses, in order.
+     * Creates a user and logs in through POST /login, like the browser does.
      *
-     * @param list<ResponseInterface> $responses
      * @return void
      */
-    protected function fakeDocker(array $responses): void
+    protected function login(): void
     {
-        $this->docker = new MockHandler($responses);
-
-        $client = new Client([
-            'handler' => HandlerStack::create($this->docker),
-            'base_uri' => 'http://docker/' . DockerClientFactory::VERSION . '/',
+        $this->container->get(UserModel::class)->createUser([
+            'name' => 'Ana',
+            'email' => 'ana@example.com',
+            'password' => 'secret',
         ]);
 
-        $this->container->set(DockerClient::class, new DockerClient($client));
+        $response = $this->request('POST', '/login', ['email' => 'ana@example.com', 'password' => 'secret']);
+        $this->assertSame(200, $response->getStatusCode(), 'login failed');
     }
 
     /**
-     * @param int $userId
-     * @return void
+     * Starts a throwaway container that prints "hello" and stays running; removed in tearDown().
+     *
+     * @return string the container id
      */
-    protected function actingAs(int $userId): void
+    protected function createRunningContainer(): string
     {
-        $_SESSION['user_id'] = $userId;
+        $response = $this->docker->request('POST', 'containers/create', [
+            'json' => [
+                'Image' => self::TEST_IMAGE,
+                'Cmd' => ['sh', '-c', 'echo hello; sleep 300'],
+                'StopTimeout' => 1,
+            ],
+        ]);
+
+        $id = json_decode((string) $response->getBody(), true)['Id'];
+        $this->createdContainers[] = $id;
+
+        $this->docker->request('POST', "containers/$id/start");
+
+        return $id;
     }
 
     /**

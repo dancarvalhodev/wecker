@@ -29,7 +29,7 @@ O plano tem o detalhe; aqui só o resumo.
 - **Cadastro:** só o admin cria usuários; o `/register` público sai.
 - **Criar container (essencial):** imagem (pull se faltar), nome, portas, env vars, restart policy,
   "iniciar após criar".
-- **Testes:** Docker mockado (Guzzle `MockHandler`) + Postgres real no banco `wecker_test`,
+- **Testes:** ~~Docker mockado~~ → Docker real (revisão de 2026-10-26) + Postgres real no banco `wecker_test`,
   recriado a cada execução.
 - **Idioma:** código e UI em inglês; documentação e specs em pt-BR.
 

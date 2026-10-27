@@ -40,8 +40,7 @@ DockerClient::class => function (DockerClientFactory $factory) {
 },
 ```
 
-A separação existe para os testes: eles entregam ao `DockerClient` um cliente falso, que responde
-o que o teste mandar, sem Docker nenhum (ver [testing.md](testing.md)).
+Assim o `DockerClient` só faz chamadas, e a descoberta fica num lugar só.
 
 ### A descoberta do daemon
 

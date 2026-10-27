@@ -1,40 +1,33 @@
 # Wecker
-**A simple and powerful interface inspired by Portainer to control your containers visually.**
+**Uma interface simples, inspirada no Portainer, para controlar seus containers visualmente.**
 
 ![img.png](docs/img2.png)
 ![img.png](docs/img.png)
 
-Note: Requires Docker Desktop on Windows/macOS.
+Obs.: no Windows e no macOS, requer o Docker Desktop.
 
-# Setup Env
-1. Install docker.
-    1. On windows you need to activate WSL2 and enable "Expose daemon on tcp://localhost:2375 without TLS" option.
-2. Install [just](https://just.systems) (e.g. `sudo apt install just`, `brew install just` or `winget install Casey.Just`).
-3. Run `just install`: it creates the `.env` files, builds and starts the containers, installs the Composer dependencies, runs the database migrations and asks for the admin's name, email and password.
-4. Open http://localhost.
+# Instalação
+1. Instale o Docker.
+    1. No Windows, ative o WSL2 e a opção "Expose daemon on tcp://localhost:2375 without TLS".
+2. Instale o [just](https://just.systems) (ex.: `sudo apt install just`, `brew install just` ou `winget install Casey.Just`).
+3. Rode `just install`: ele cria os arquivos `.env`, constrói e sobe os containers, instala as dependências do Composer, aplica as migrações e pede nome, e-mail e senha do admin.
+4. Abra http://localhost.
 
-# Common commands
-Run `just` to list every command. The most used:
+# Comandos do dia a dia
+`just` lista todos. Os mais usados:
 
 ```bash
 just up | stop | status | logs   # containers
-just migrate                     # apply pending database migrations
-just admin-create                # create another admin
-just test | stan | cs            # tests, static analysis, code style
+just migrate                     # aplica as migrações pendentes
+just admin-create                # cria outro admin
+just test | stan | cs            # testes, análise estática, padrão de código
 ```
 
-# How it works
-Architecture notes for developers (in Portuguese) live in `.claude/arch-explain/`. Start with `request-flow.md`.
+# Como funciona
+As notas de arquitetura ficam em `.claude/arch-explain/`. Comece por `request-flow.md`.
 
-# Pending to Fix
-- Implement tests.
-- Implement BlockUI.
-
-# Future Implements
-- Health Status.
-- Docker installation info.
-- Web console to manage containers.
-- Log Operations (Start, Stop, Log).
-- Create containers.
-- Real time docker logs.
-- Improve UI and UX.
+# Próximos passos
+- Revamp visual.
+- Criar containers pela interface.
+- Usuários e papéis (Admin / User).
+- Depois: health status, informações da instalação do Docker, console web, log de operações e logs em tempo real.
