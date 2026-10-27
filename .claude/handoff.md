@@ -12,7 +12,8 @@ sessão atualiza este arquivo; quem começar lê este arquivo primeiro.
   **10 Revamp visual**, **11 Criar container pela UI** e **12 Usuários e papéis fixos**.
 - **Etapa 8:** confirmada em 2026-10-27. Testes passaram a usar o Docker real.
 - **Etapa 9:** confirmada em 2026-10-27.
-- **Etapa 10 (revamp visual):** entregue em 2026-10-27, aguardando conferência. Direção escolhida:
+- **Etapa 10 (revamp visual):** confirmada em 2026-10-27.
+- **Etapa 11 (criar container):** entregue em 2026-10-27, aguardando conferência. Direção escolhida:
   console (fonte JetBrains Mono), cantos retos, fundo preto-arroxeado e acento lavanda `#a78bfa`.
   Tokens e classes `wk-*` em `www/public/assets/css/style.css`, que sobrescreve o Bootstrap
   (`data-bs-theme="dark"`). `APP_ENV` agora vem do `www/.env`

@@ -137,6 +137,7 @@ Qualquer exceção, em qualquer camada, sobe até o middleware de erro do Slim, 
 | `GET /dashboard` | `DashboardController::index` | Busca os contadores no Docker e renderiza a página. |
 | `POST /dashboard/list` | `DashboardController::list` | JSON `{data: [...]}` para a DataTable. |
 | `POST /dashboard/{start,stop,log}` | `DashboardController::start/stop/log` | Ações num container (`id` no corpo). |
+| `POST /dashboard/create` | `DashboardController::create` | Cria um container (pull se a imagem faltar), a partir do modal do dashboard. |
 
 Todas as rotas `/dashboard*` passam pelo `AuthMidleware`.
 

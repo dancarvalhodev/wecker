@@ -56,7 +56,7 @@ abstract class IntegrationTestCase extends TestCase
     protected function tearDown(): void
     {
         foreach ($this->createdContainers as $id) {
-            $this->docker->request('DELETE', "containers/$id", ['query' => ['force' => 'true']]);
+            $this->docker->request('DELETE', "containers/$id", ['query' => ['force' => 'true'], 'http_errors' => false]);
         }
 
         $this->connection->rollBack();
@@ -96,11 +96,22 @@ abstract class IntegrationTestCase extends TestCase
         ]);
 
         $id = json_decode((string) $response->getBody(), true)['Id'];
-        $this->createdContainers[] = $id;
+        $this->removeAfterTest($id);
 
         $this->docker->request('POST', "containers/$id/start");
 
         return $id;
+    }
+
+    /**
+     * Removes the container (by id or name) in tearDown(), if it exists by then.
+     *
+     * @param string $idOrName
+     * @return void
+     */
+    protected function removeAfterTest(string $idOrName): void
+    {
+        $this->createdContainers[] = $idOrName;
     }
 
     /**

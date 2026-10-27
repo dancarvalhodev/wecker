@@ -70,6 +70,9 @@ e o `bin/php/entrypoint.sh` põe o usuário `www-data` (o do php-fpm) no grupo d
 | `startContainer($id)` | `POST containers/$id/start` | Só o código HTTP |
 | `stopContainer($id)` | `POST containers/$id/stop` | Só o código HTTP |
 | `logs($id)` | `GET containers/$id/logs?stdout=1&stderr=1&tail=10` | `['statusCode' => ..., 'body' => ...]` |
+| `imageExists($image)` | `GET images/$image/json` | `true`/`false` (404) |
+| `pullImage($image)` | `POST images/create?fromImage=...` | nada; espera o download (timeout de 600 s) |
+| `createContainer($config, $name)` | `POST containers/create?name=...` | O id do container; 409 se o nome já existe |
 
 A versão da API vem da constante `DockerClientFactory::VERSION = 'v1.54'`, no começo de toda URL. Fixar a versão
 garante que as respostas tenham sempre o mesmo formato, mesmo se o Docker for atualizado.

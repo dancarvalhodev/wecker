@@ -102,6 +102,26 @@ class DashboardController extends AbstractController
     }
 
     /**
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @return ResponseInterface
+     * @throws GuzzleException
+     * @throws ValidationException
+     */
+    public function create(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    {
+        $data = $request->getParsedBody();
+
+        if (!is_array($data)) {
+            throw new ValidationException(['Invalid request payload.']);
+        }
+
+        $dockerResponse = $this->dashboardService->createContainer($data);
+
+        return $this->returnWithJson($response, [$dockerResponse['message']], $dockerResponse['status']);
+    }
+
+    /**
      * The id goes straight into the Docker API URL, so only a real container id (hex) is accepted.
      *
      * @param ServerRequestInterface $request

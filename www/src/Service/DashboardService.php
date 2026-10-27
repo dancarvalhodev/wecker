@@ -2,7 +2,10 @@
 
 namespace App\Service;
 
+use App\Exception\ValidationException;
 use App\Service\Api\DockerClient;
+use App\Service\Container\Validator\CreateContainerValidator;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 
 class DashboardService
@@ -15,9 +18,55 @@ class DashboardService
     /** @var DockerClient $dockerClient */
     private DockerClient $dockerClient;
 
-    public function __construct(DockerClient $dockerClient)
+    /** @var CreateContainerValidator $createValidator */
+    private CreateContainerValidator $createValidator;
+
+    public function __construct(DockerClient $dockerClient, CreateContainerValidator $createValidator)
     {
         $this->dockerClient = $dockerClient;
+        $this->createValidator = $createValidator;
+    }
+
+    /**
+     * Pulls the image when it is not local, creates the container and optionally starts it.
+     *
+     * @param array<string, mixed> $form the raw form: image, name, ports ("8081:80, 8443:443"),
+     *                                   env (one KEY=value per line), restart, start
+     * @return array{status: int, message: string}
+     * @throws ValidationException
+     * @throws GuzzleException
+     */
+    public function createContainer(array $form): array
+    {
+        $data = [
+            'image' => trim((string) ($form['image'] ?? '')),
+            'name' => trim((string) ($form['name'] ?? '')),
+            'ports' => $this->splitList((string) ($form['ports'] ?? ''), ','),
+            'env' => $this->splitList((string) ($form['env'] ?? ''), "\n"),
+            'restart' => (string) ($form['restart'] ?? 'no'),
+        ];
+
+        $this->createValidator->validate($data);
+
+        if (!$this->dockerClient->imageExists($data['image'])) {
+            $this->dockerClient->pullImage($data['image']);
+        }
+
+        try {
+            $id = $this->dockerClient->createContainer($this->buildConfig($data), $data['name'] ?: null);
+        } catch (ClientException $e) {
+            if ($e->getResponse()->getStatusCode() === 409) {
+                throw new ValidationException(['name' => 'Container name already in use']);
+            }
+
+            throw $e;
+        }
+
+        if (!empty($form['start'])) {
+            $this->dockerClient->startContainer($id);
+        }
+
+        return ['status' => 200, 'message' => 'Container created'];
     }
 
     /**
@@ -146,6 +195,59 @@ class DashboardService
         }
 
         return implode(', ', array_unique($mappings));
+    }
+
+    /**
+     * @param string $text
+     * @param string $separator
+     * @return list<string> the non-empty, trimmed items
+     */
+    private function splitList(string $text, string $separator): array
+    {
+        $items = [];
+
+        foreach (explode($separator, $text) as $item) {
+            $item = trim($item);
+
+            if ($item !== '') {
+                $items[] = $item;
+            }
+        }
+
+        return $items;
+    }
+
+    /**
+     * Docker "create container" body: "8081:80" becomes ExposedPorts["80/tcp"] + PortBindings["80/tcp"].
+     *
+     * @param array{image: string, name: string, ports: list<string>, env: list<string>, restart: string} $data
+     * @return array<string, mixed>
+     */
+    private function buildConfig(array $data): array
+    {
+        $exposedPorts = [];
+        $portBindings = [];
+
+        foreach ($data['ports'] as $mapping) {
+            [$hostPort, $containerPort] = explode(':', $mapping);
+            $exposedPorts["$containerPort/tcp"] = new \stdClass();
+            $portBindings["$containerPort/tcp"] = [['HostPort' => $hostPort]];
+        }
+
+        $config = [
+            'Image' => $data['image'],
+            'Env' => $data['env'],
+            'HostConfig' => [
+                'RestartPolicy' => ['Name' => $data['restart']],
+            ],
+        ];
+
+        if ($exposedPorts !== []) {
+            $config['ExposedPorts'] = $exposedPorts;
+            $config['HostConfig']['PortBindings'] = $portBindings;
+        }
+
+        return $config;
     }
 
     /**
