@@ -8,12 +8,14 @@ sessão atualiza este arquivo; quem começar lê este arquivo primeiro.
 ## Onde paramos
 
 - **Plano:** `.claude/plans/v2.md` (branch `feature/v2`), executado com a skill `modo-codando`.
-  Revisado em 2026-10-26 (MVP): restam as etapas **8 Segurança essencial**, **9 Bugs visíveis**,
-  **10 Revamp visual**, **11 Criar container pela UI** e **12 Usuários e papéis fixos**.
+  Revisado em 2026-10-26 (MVP) e **concluído em 2026-10-27** (etapas 8–11 feitas, 12 descartada).
+  O que vem depois está no roadmap do `README.md`.
 - **Etapa 8:** confirmada em 2026-10-27. Testes passaram a usar o Docker real.
 - **Etapa 9:** confirmada em 2026-10-27.
 - **Etapa 10 (revamp visual):** confirmada em 2026-10-27.
-- **Etapa 11 (criar container):** entregue em 2026-10-27, aguardando conferência. Direção escolhida:
+- **Etapa 11 (criar container):** confirmada em 2026-10-27.
+- **Etapa 12 (usuários e papéis):** descartada em 2026-10-27; virou o item "Controle de usuários"
+  do roadmap no README. **Plano v2 concluído.** Direção escolhida:
   console (fonte JetBrains Mono), cantos retos, fundo preto-arroxeado e acento lavanda `#a78bfa`.
   Tokens e classes `wk-*` em `www/public/assets/css/style.css`, que sobrescreve o Bootstrap
   (`data-bs-theme="dark"`). `APP_ENV` agora vem do `www/.env`

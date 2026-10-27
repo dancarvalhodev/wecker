@@ -26,8 +26,17 @@ just test | stan | cs            # testes, análise estática, padrão de códig
 # Como funciona
 As notas de arquitetura ficam em `.claude/arch-explain/`. Comece por `request-flow.md`.
 
-# Próximos passos
-- Revamp visual.
-- Criar containers pela interface.
-- Usuários e papéis (Admin / User).
-- Depois: health status, informações da instalação do Docker, console web, log de operações e logs em tempo real.
+# Roadmap
+
+## Controle de usuários
+Hoje todo usuário é criado pelo terminal (`just admin-create`) e pode fazer tudo. O próximo passo é gerenciar o acesso pela interface:
+- **Papéis:** *Admin* faz tudo; *User* só acompanha (vê os containers e os logs, sem iniciar, parar ou criar).
+- **Tela de usuários** (só Admin): listar, criar, trocar o papel e ativar/desativar contas.
+- **Acesso revogado na hora:** um usuário desativado perde a sessão já na requisição seguinte.
+- **Proteções:** o admin não desativa a própria conta nem rebaixa o último admin.
+
+## Depois
+- Health status dos containers e informações da instalação do Docker.
+- Logs em tempo real e console web.
+- Registro das operações (quem iniciou, parou ou criou cada container).
+- Volumes e redes na criação de containers.
