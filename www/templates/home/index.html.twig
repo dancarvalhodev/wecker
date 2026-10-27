@@ -1,65 +1,33 @@
 {% extends "/layout/base.html.twig" %}
 
 {% block content %}
-    <section class="py-5 text-center bg-white">
-        <div class="container">
-            <h1 class="display-5 fw-bold">Manage containers without the chaos</h1>
-            <p class="lead text-muted">
-                A simple and powerful interface inspired by Portainer to control your containers visually.
-            </p>
-
-            <div class="mt-4">
-                <a href="/login" class="btn btn-primary btn-lg me-2">Get Started</a>
-            </div>
-        </div>
+    <section class="container py-5">
+        <p class="wk-label mb-3">Docker, without the terminal</p>
+        <h1 class="fw-bold mb-3 wk-mono-strong">$ manage containers without the chaos</h1>
+        <p class="text-secondary mb-4" style="max-width: 640px;">
+            A simple interface, inspired by Portainer, to start, stop and inspect your containers.
+        </p>
+        <a href="/login" class="btn btn-primary btn-lg px-4">Get started</a>
     </section>
 
-    <section class="py-5">
-        <div class="container">
-            <div class="row text-center g-4">
-
-                <div class="col-md-4">
-                    <div class="p-4 bg-white shadow-sm rounded">
-                        <h5>⚡ Fast Control</h5>
-                        <p class="text-muted">Start, stop and inspect containers instantly.</p>
-                    </div>
+    <section class="container pb-5">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="wk-panel p-4 h-100">
+                    <p class="wk-label mb-2">Fast control</p>
+                    <p class="mb-0">Start, stop and inspect containers in one click.</p>
                 </div>
-
-                <div class="col-md-4">
-                    <div class="p-4 bg-white shadow-sm rounded">
-                        <h5>📊 Clear Overview</h5>
-                        <p class="text-muted">Visualize your environment without digging through logs.</p>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="p-4 bg-white shadow-sm rounded">
-                        <h5>🔒 Full Control</h5>
-                        <p class="text-muted">No black boxes. You stay in charge.</p>
-                    </div>
-                </div>
-
             </div>
-        </div>
-    </section>
-
-    <section class="pb-5">
-        <div class="container">
-            <div class="bg-dark text-white p-4 rounded shadow-sm">
-                <h6 class="text-uppercase text-muted">System Overview</h6>
-                <div class="d-flex justify-content-between mt-3">
-                    <div>
-                        <strong>Running</strong>
-                        <div class="fs-4">3</div>
-                    </div>
-                    <div>
-                        <strong>Stopped</strong>
-                        <div class="fs-4">1</div>
-                    </div>
-                    <div>
-                        <strong>Status</strong>
-                        <div class="fs-4 text-success">Healthy</div>
-                    </div>
+            <div class="col-md-4">
+                <div class="wk-panel p-4 h-100">
+                    <p class="wk-label mb-2">Clear overview</p>
+                    <p class="mb-0">See what is running without digging through the CLI.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="wk-panel p-4 h-100">
+                    <p class="wk-label mb-2">You stay in charge</p>
+                    <p class="mb-0">No black boxes: it talks straight to the Docker API.</p>
                 </div>
             </div>
         </div>

@@ -1,76 +1,65 @@
 {% extends "/layout/base.html.twig" %}
 
+{% block title %}Containers · Wecker{% endblock %}
+
 {% block content %}
-    <section class="py-4 bg-light">
-        <div class="container">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h3 class="fw-bold mb-0">Dashboard</h3>
-            </div>
-            <div class="row g-3 mb-4">
-                <div class="col-md-4">
-                    <div class="card shadow-sm text-center p-3">
-                        <h6 class="text-muted">Running</h6>
-                        <h2 class="text-success">{{ docker.running|default(0) }}</h2>
-                    </div>
-                </div>
+    <section class="container py-4">
+        <h1 class="fs-5 fw-semibold mb-4 wk-mono-strong"><span class="wk-accent">$</span> docker ps -a</h1>
 
-                <div class="col-md-4">
-                    <div class="card shadow-sm text-center p-3">
-                        <h6 class="text-muted">Stopped</h6>
-                        <h2 class="text-danger">{{ docker.stopped|default(0) }}</h2>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="card shadow-sm text-center p-3">
-                        <h6 class="text-muted">Total</h6>
-                        <h2>{{ docker.total|default(0) }}</h2>
-                    </div>
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="wk-stat wk-stat--running">
+                    <div class="wk-label">Running</div>
+                    <div class="wk-stat__value">{{ '%02d'|format(docker.running|default(0)) }}</div>
                 </div>
             </div>
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="mb-3">Containers</h5>
-                    <div class="table-responsive">
-                        <table id="dashtable" class="table align-middle">
-                            <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Status</th>
-                                <th>Image</th>
-                                <th>Ports</th>
-                                <th class="text-end">Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
+            <div class="col-md-4">
+                <div class="wk-stat wk-stat--stopped">
+                    <div class="wk-label">Stopped</div>
+                    <div class="wk-stat__value">{{ '%02d'|format(docker.stopped|default(0)) }}</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="wk-stat">
+                    <div class="wk-label">Total</div>
+                    <div class="wk-stat__value">{{ '%02d'|format(docker.total|default(0)) }}</div>
                 </div>
             </div>
         </div>
-    </section>
-    <section>
-        <div class="modal fade" id="logModal" tabindex="-1" aria-labelledby="logModal" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Logs</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="alert alert-primary" role="alert">
-                            Only the last ten lines of the container log are showing below.
-                        </div>
-                        <pre id="logContent" style="max-height:300px; overflow:auto;"></pre>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
-                </div>
+
+        <div class="wk-panel p-3">
+            <div class="table-responsive">
+                <table id="dashtable" class="table align-middle mb-0">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>Image</th>
+                        <th>Ports</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
     </section>
+
+    <div class="modal fade" id="logModal" tabindex="-1" aria-labelledby="logModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content wk-panel">
+                <div class="modal-header">
+                    <h2 class="modal-title wk-label" id="logModalTitle">Logs <span class="text-secondary">— last 10 lines</span></h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <pre id="logContent" class="wk-logs"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
+
 {% block scripts %}
     {{ parent() }}
     <script src="assets/js/pages/dashboard.js"></script>

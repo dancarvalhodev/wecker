@@ -13,7 +13,7 @@ final class UserRoutesTest extends IntegrationTestCase
         $response = $this->request('GET', '/dashboard');
 
         $this->assertSame(200, $response->getStatusCode());
-        $this->assertStringContainsString('Dashboard', (string) $response->getBody());
+        $this->assertStringContainsString('docker ps -a', (string) $response->getBody());
     }
 
     public function testWrongPasswordKeepsTheDashboardClosed(): void
