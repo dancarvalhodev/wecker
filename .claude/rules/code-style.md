@@ -53,7 +53,7 @@ Never `new` a collaborator inside a class (e.g. `new DockerClient()` in a servic
 
 - Normalize input first (`GeneralNormalizer::clean()` trims all values and lowercases `email`), then validate.
 - Validators use `respect/validation` (imported as `use Respect\Validation\ValidatorBuilder as v;`).
-- **Convention to follow: validators should `throw new ValidationException($errors)` on failure** — `LoginValidator` does this correctly. `RegisterValidator` instead *returns* an error array and its caller ignores it (a latent bug); prefer the throwing style for new/changed validators.
+- **Convention to follow: validators should `throw new ValidationException($errors)` on failure** — `LoginValidator` is the reference.
 
 ## Errors & result shapes
 

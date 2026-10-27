@@ -34,10 +34,9 @@ www/
 │   ├── layout/base.html.twig        ← o papel timbrado: <head>, menu, rodapé, scripts base
 │   ├── home/index.html.twig         ← página inicial
 │   ├── crud/user/login.html.twig    ← formulário de login
-│   ├── crud/user/register.html.twig ← formulário de cadastro
 │   └── dashboard/index.html.twig    ← contadores, tabela e modal de logs
 └── public/assets/
-    ├── js/pages/{login,register,dashboard}.js   ← um módulo por página
+    ├── js/pages/{login,dashboard}.js   ← um módulo por página
     ├── js/{jquery,boostrap,datatables,sweetalert2}/   ← bibliotecas (não editar)
     └── css/{reset.css,style.css,boostrap/,datatables/}
 ```
@@ -64,7 +63,7 @@ e o resto, e o módulo da página quebra.
 ### Dados do servidor para o template
 
 - **Globais** (`config/twig.php`), disponíveis em todo template: `auth.logged` (o menu mostra
-  Login/Register ou Logout) e `global.year` (o rodapé).
+  Login ou Logout) e `global.year` (o rodapé).
 - **Por página**: o `DashboardController::index()` passa `docker.running`, `docker.stopped` e
   `docker.total`, mostrados nos cartões com `|default(0)`.
 
@@ -100,15 +99,14 @@ as de outro módulo.
 
 ### Os formulários
 
-`login.js` e `register.js` conferem campos vazios (e, no cadastro, se as senhas batem), mostram um
-aviso do SweetAlert e só então fazem o `POST` com `$(this).serialize()`. O servidor valida de novo:
+`login.js` confere campos vazios, mostra um aviso do SweetAlert e só então fazem o `POST` com `$(this).serialize()`. O servidor valida de novo:
 a checagem do navegador é conforto, não segurança.
 
 ## Pegadinhas
 
-- **XSS na tabela.** As colunas `name` e `image` são inseridas como HTML sem escapar. Um container
-  chamado `<img src=x onerror=alert(1)>` executa código na página de quem abrir o dashboard
-  (problema 4, etapa 8). Os logs não têm esse problema, porque usam `.text()`.
+- **Escape o que vem do Docker.** A DataTable insere o `render` como HTML. `name` e `image` passam
+  por `escapeHtml()`; um campo novo vindo do Docker precisa do mesmo cuidado, senão um container
+  chamado `<img src=x onerror=alert(1)>` executa código na página.
 - **`Create.init()` não existe.** O `dashboard/index.html.twig` chama um módulo `Create` que não
   foi escrito, e isso gera um erro no console em toda abertura do dashboard (problema 14; o módulo
   nasce na etapa 11).

@@ -8,6 +8,8 @@ use GuzzleHttp\Psr7\Response;
 
 final class DashboardRoutesTest extends IntegrationTestCase
 {
+    private const string CONTAINER_ID = 'abc123abc123';
+
     public function testDashboardRedirectsGuestsToLogin(): void
     {
         $response = $this->request('GET', '/dashboard');
@@ -41,10 +43,11 @@ final class DashboardRoutesTest extends IntegrationTestCase
         $this->actingAs(1);
         $this->fakeDocker([new Response(204)]);
 
-        $response = $this->request('POST', '/dashboard/start', ['id' => 'abc123']);
+        $response = $this->request('POST', '/dashboard/start', ['id' => self::CONTAINER_ID]);
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('["Container started"]', (string) $response->getBody());
+        $this->assertDockerCalled('POST', '/v1.54/containers/' . self::CONTAINER_ID . '/start');
     }
 
     public function testStopContainer(): void
@@ -52,10 +55,11 @@ final class DashboardRoutesTest extends IntegrationTestCase
         $this->actingAs(1);
         $this->fakeDocker([new Response(204)]);
 
-        $response = $this->request('POST', '/dashboard/stop', ['id' => 'abc123']);
+        $response = $this->request('POST', '/dashboard/stop', ['id' => self::CONTAINER_ID]);
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('["Container stopped"]', (string) $response->getBody());
+        $this->assertDockerCalled('POST', '/v1.54/containers/' . self::CONTAINER_ID . '/stop');
     }
 
     public function testContainerLogs(): void
@@ -63,9 +67,30 @@ final class DashboardRoutesTest extends IntegrationTestCase
         $this->actingAs(1);
         $this->fakeDocker([new Response(200, [], 'hello from the container')]);
 
-        $response = $this->request('POST', '/dashboard/log', ['id' => 'abc123']);
+        $response = $this->request('POST', '/dashboard/log', ['id' => self::CONTAINER_ID]);
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('["hello from the container"]', (string) $response->getBody());
+        $this->assertDockerCalled('GET', '/v1.54/containers/' . self::CONTAINER_ID . '/logs');
+    }
+
+    public function testInvalidContainerIdNeverReachesDocker(): void
+    {
+        $this->expectErrorLog();
+        $this->actingAs(1);
+
+        $response = $this->request('POST', '/dashboard/stop', ['id' => '../../images/x']);
+
+        $this->assertSame(422, $response->getStatusCode());
+        $this->assertSame('{"success":false,"error":["Invalid container ID."]}', (string) $response->getBody());
+        $this->assertNull($this->docker->getLastRequest());
+    }
+
+    private function assertDockerCalled(string $method, string $path): void
+    {
+        $request = $this->docker->getLastRequest();
+
+        $this->assertNotNull($request);
+        $this->assertSame($method . ' ' . $path, $request->getMethod() . ' ' . $request->getUri()->getPath());
     }
 }

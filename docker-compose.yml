@@ -29,16 +29,12 @@ services:
         restart: always
         volumes:
             - ./data/redis:/data
-        ports:
-            - "6379:6379"
     postgres:
         build:
             context: bin/postgres
         container_name: ${CONTAINER_NAME}postgres
         depends_on:
           - php
-        ports:
-            - ${POSTGRES_PORT}:5432
         volumes:
           - ./data/postgres:/var/lib/postgresql
         environment:

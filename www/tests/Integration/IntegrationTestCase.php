@@ -33,6 +33,9 @@ abstract class IntegrationTestCase extends TestCase
     /** @var Connection $connection */
     protected Connection $connection;
 
+    /** @var MockHandler $docker the fake Docker; getLastRequest() shows what the app asked */
+    protected MockHandler $docker;
+
     protected function setUp(): void
     {
         session_start();
@@ -62,8 +65,10 @@ abstract class IntegrationTestCase extends TestCase
      */
     protected function fakeDocker(array $responses): void
     {
+        $this->docker = new MockHandler($responses);
+
         $client = new Client([
-            'handler' => HandlerStack::create(new MockHandler($responses)),
+            'handler' => HandlerStack::create($this->docker),
             'base_uri' => 'http://docker/' . DockerClientFactory::VERSION . '/',
         ]);
 

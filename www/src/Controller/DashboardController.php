@@ -43,8 +43,8 @@ class DashboardController extends AbstractController
             'docker' => [
                 'running' => $data['running'],
                 'stopped' => $data['stopped'],
-                'total' => $data['total']
-            ]
+                'total' => $data['total'],
+            ],
         ]);
     }
 
@@ -71,21 +71,9 @@ class DashboardController extends AbstractController
      */
     public function start(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        if ($request->getMethod() === 'POST') {
-            $data = $request->getParsedBody();
+        $dockerResponse = $this->dashboardService->startContainer($this->extractContainerId($request));
 
-            if (!is_array($data)) {
-                throw new ValidationException(['Invalid request payload.']);
-            }
-
-            if (!isset($data['id'])) {
-                throw new ValidationException(['ID not found.']);
-            }
-
-            $dockerResponse = $this->dashboardService->startContainer($data['id']);
-
-            return $this->returnWithJson($response, [$dockerResponse['message']], $dockerResponse['status']);
-        }
+        return $this->returnWithJson($response, [$dockerResponse['message']], $dockerResponse['status']);
     }
 
     /**
@@ -97,21 +85,9 @@ class DashboardController extends AbstractController
      */
     public function stop(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        if ($request->getMethod() === 'POST') {
-            $data = $request->getParsedBody();
+        $dockerResponse = $this->dashboardService->stopContainer($this->extractContainerId($request));
 
-            if (!is_array($data)) {
-                throw new ValidationException(['Invalid request payload.']);
-            }
-
-            if (!isset($data['id'])) {
-                throw new ValidationException(['ID not found.']);
-            }
-
-            $dockerResponse = $this->dashboardService->stopContainer($data['id']);
-
-            return $this->returnWithJson($response, [$dockerResponse['message']], $dockerResponse['status']);
-        }
+        return $this->returnWithJson($response, [$dockerResponse['message']], $dockerResponse['status']);
     }
 
     /**
@@ -123,20 +99,34 @@ class DashboardController extends AbstractController
      */
     public function log(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        if ($request->getMethod() === 'POST') {
-            $data = $request->getParsedBody();
+        $dockerResponse = $this->dashboardService->logs($this->extractContainerId($request));
 
-            if (!is_array($data)) {
-                throw new ValidationException(['Invalid request payload.']);
-            }
+        return $this->returnWithJson($response, [$dockerResponse['message']], $dockerResponse['status']);
+    }
 
-            if (!isset($data['id'])) {
-                throw new ValidationException(['ID not found.']);
-            }
+    /**
+     * The id goes straight into the Docker API URL, so only a real container id (hex) is accepted.
+     *
+     * @param ServerRequestInterface $request
+     * @return string
+     * @throws ValidationException
+     */
+    private function extractContainerId(ServerRequestInterface $request): string
+    {
+        $data = $request->getParsedBody();
 
-            $dockerResponse = $this->dashboardService->logs($data['id']);
-
-            return $this->returnWithJson($response, [$dockerResponse['message']], $dockerResponse['status']);
+        if (!is_array($data)) {
+            throw new ValidationException(['Invalid request payload.']);
         }
+
+        if (!isset($data['id'])) {
+            throw new ValidationException(['ID not found.']);
+        }
+
+        if (!is_string($data['id']) || !ctype_xdigit($data['id'])) {
+            throw new ValidationException(['Invalid container ID.']);
+        }
+
+        return $data['id'];
     }
 }

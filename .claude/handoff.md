@@ -10,7 +10,8 @@ sessão atualiza este arquivo; quem começar lê este arquivo primeiro.
 - **Plano:** `.claude/plans/v2.md` (branch `feature/v2`), executado com a skill `modo-codando`.
   Revisado em 2026-10-26 (MVP): restam as etapas **8 Segurança essencial**, **9 Bugs visíveis**,
   **10 Revamp visual**, **11 Criar container pela UI** e **12 Usuários e papéis fixos**.
-- **Próxima:** etapa 8.
+- **Etapa 8:** entregue em 2026-10-26, aguardando conferência. Postgres e Redis sem porta no host
+  (`POSTGRES_PORT` saiu do `env-example`).
 - **Feito (1–7):** skill `modo-codando`; PHPUnit/PHPStan/PHP-CS-Fixer; `justfile`; migrações
   (`Migrator`, `just migrate`, `just admin-create`); PHP em Ubuntu 24.04 + Caddy; `arch-explain/`;
   injeção do Docker (`DockerClientFactory`, `config/docker.php`, `AppFactory`) e 8 testes de rota

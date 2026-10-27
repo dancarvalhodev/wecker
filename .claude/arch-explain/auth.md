@@ -32,7 +32,7 @@ A **pulseira de um evento**.
 | `Service\AuthService` | Lê e grava `$_SESSION['user_id']`. |
 | `Service\AuthMidleware` | Barra as rotas `/dashboard*` sem sessão. |
 | `Model\User\UserModel::authenticateUser()` | Confere e-mail e senha. |
-| `config/twig.php` | Global `auth.logged` para o menu (Login/Register ou Logout). |
+| `config/twig.php` | Global `auth.logged` para o menu (Login ou Logout). |
 
 ### O login, passo a passo
 
@@ -85,13 +85,15 @@ navegador, mas aponta para nada.
   requisição.
 - **Ninguém confere o papel.** Qualquer usuário logado faz tudo no dashboard, e o `UserRepo::hydrate()`
   ainda monta todo usuário como `ROLE_USER` (etapa 12).
-- **O cadastro é público e não valida.** `RegisterValidator::validate()` *devolve* os erros, e o
-  `UserController::register()` ignora o retorno (problemas 2 e 11 do plano).
+- **Não há cadastro pela web.** O `/register` saiu na etapa 8; até a etapa 12, usuários só pelo
+  `just admin-create`.
 - **A mensagem de erro do login não aparece.** O 422 cai no callback `error` do `login.js`, que
   mostra "A internal error occurred"; e o código procura os erros em `response.messages`, mas o
   servidor manda em `error` (problema 12).
-- **Sem CSRF.** Os `POST` não exigem token: um site malicioso aberto no mesmo navegador poderia
-  disparar `POST /dashboard/stop` com o seu cookie (problema 3, etapa 8).
+- **CSRF via `SameSite=Strict`, sem token.** O `php.ini` marca o cookie de sessão como
+  `SameSite=Strict`: o navegador não o envia em requisições vindas de outro site, então um `POST`
+  forjado chega sem login. Efeito colateral: quem chega ao Wecker por um link de outro site vê a
+  primeira página como deslogado.
 
 ## Comandos úteis
 

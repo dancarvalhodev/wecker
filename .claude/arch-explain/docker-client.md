@@ -88,8 +88,8 @@ garante que as respostas tenham sempre o mesmo formato, mesmo se o Docker for at
 
 ## Pegadinhas
 
-- **O `id` vai direto na URL.** `"containers/$id/start"` sem validar: um `id` como `../../algo`
-  muda o endpoint chamado (problema 1 do plano, **segurança**, etapa 8).
+- **O `id` vai na URL, então é validado antes.** `DashboardController::extractContainerId()` só aceita
+  caracteres hex (`ctype_xdigit`); sem isso, um `id` como `../../algo` mudaria o endpoint chamado.
 - **O 404 nunca chega ao `match`.** O Guzzle, por padrão (`http_errors`), **lança exceção** em
   respostas 4xx e 5xx. Um container inexistente gera uma `ClientException`, que vira 500 no
   `HttpErrorHandler`, e não "Container not found". Só o 204 e o 304 chegam ao `match`.

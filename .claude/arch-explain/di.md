@@ -53,11 +53,11 @@ $builder->addDefinitions(dirname(__DIR__) . '/config/docker.php');
 ### Autowiring: o caso comum
 
 ```php
-public function __construct(Twig $twig, UserModel $userModel, RegisterValidator $registerValidator,
-                            LoginValidator $loginValidator, GeneralNormalizer $generalNormalizer, AuthService $auth)
+public function __construct(Twig $twig, UserModel $userModel, LoginValidator $loginValidator,
+                            GeneralNormalizer $generalNormalizer, AuthService $auth)
 ```
 
-Para criar o `UserController`, o container vê seis tipos e cria cada um, descendo a árvore:
+Para criar o `UserController`, o container vê cinco tipos e cria cada um, descendo a árvore:
 
 ```
 UserController
@@ -66,7 +66,6 @@ UserController
 │   └── UserRepo
 │       └── Connection ← definição em config/database.php
 │           └── ConnectionFactory (autowiring)
-├── RegisterValidator  (sem dependências)
 ├── LoginValidator     (sem dependências)
 ├── GeneralNormalizer  (sem dependências)
 └── AuthService        (sem dependências)

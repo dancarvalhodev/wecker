@@ -73,7 +73,7 @@ Com `logErrors` e `logErrorDetails` ligados, o Slim grava a mensagem e o stack t
   **500** (problema 5 do plano, etapa 9).
 - **`error` muda de tipo.** É array nos casos tipados e texto no 500. Quem lê no JavaScript precisa
   tratar os dois.
-- **O JS procura no lugar errado.** `login.js` e `register.js` leem `response.messages` no callback
+- **O JS procura no lugar errado.** `login.js` lê `response.messages` no callback
   de *sucesso*, mas os erros vêm em `error` e com status 4xx, que cai no callback `error` (problema
   12). Resultado: o usuário só vê "A internal error occurred".
 - **Toda validação gera um stack trace no log.** Um login com senha errada é uma

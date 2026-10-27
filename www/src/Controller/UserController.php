@@ -9,7 +9,6 @@ use App\Model\User\UserModel;
 use App\Service\AuthService;
 use App\Service\User\Normalizer\GeneralNormalizer;
 use App\Service\User\Validator\LoginValidator;
-use App\Service\User\Validator\RegisterValidator;
 use Doctrine\DBAL\Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -20,9 +19,6 @@ use Twig\Error\SyntaxError;
 
 class UserController extends AbstractController
 {
-    /** @var RegisterValidator $registerValidator */
-    private RegisterValidator $registerValidator;
-
     /** @var GeneralNormalizer $generalNormalizer */
     private GeneralNormalizer $generalNormalizer;
 
@@ -37,51 +33,18 @@ class UserController extends AbstractController
     /**
      * @param Twig $twig
      * @param UserModel $userModel
-     * @param RegisterValidator $registerValidator
      * @param LoginValidator $loginValidator
      * @param GeneralNormalizer $generalNormalizer
      * @param AuthService $auth
      */
-    public function __construct(Twig $twig, UserModel $userModel, RegisterValidator $registerValidator, LoginValidator $loginValidator, GeneralNormalizer $generalNormalizer, AuthService $auth)
+    public function __construct(Twig $twig, UserModel $userModel, LoginValidator $loginValidator, GeneralNormalizer $generalNormalizer, AuthService $auth)
     {
         parent::__construct($twig);
 
-        $this->registerValidator = $registerValidator;
         $this->generalNormalizer = $generalNormalizer;
         $this->loginValidator = $loginValidator;
         $this->auth = $auth;
         $this->userModel = $userModel;
-    }
-
-    /**
-     * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
-     * @return ResponseInterface
-     * @throws Exception
-     * @throws LoaderError
-     * @throws RuntimeError
-     * @throws SyntaxError
-     * @throws ValidationException
-     */
-    public function register(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
-    {
-        if ($request->getMethod() === 'POST') {
-
-            $data = $request->getParsedBody();
-
-            if (!is_array($data)) {
-                throw new ValidationException(['Invalid request payload.']);
-            }
-
-            $data = $this->generalNormalizer->clean($data);
-            $this->registerValidator->validate($data);
-            $user = $this->userModel->createUser($data);
-            $this->auth->login($user);
-
-            return $this->returnWithSuccess($response);
-        }
-
-        return $this->getTwig()->render($response, 'crud/user/register.html.twig');
     }
 
     /**

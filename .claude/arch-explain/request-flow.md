@@ -134,7 +134,6 @@ Qualquer exceção, em qualquer camada, sobe até o middleware de erro do Slim, 
 |---|---|---|
 | `GET /` | `HomeController::index` | Renderiza a página inicial (Twig). |
 | `GET/POST /login` | `UserController::login` | GET renderiza o formulário; POST autentica e grava a sessão. |
-| `GET/POST /register` | `UserController::register` | Cadastro público (sai na etapa 8). |
 | `GET /logout` | `UserController::logout` | Destrói a sessão e redireciona para `/`. |
 | `GET /dashboard` | `DashboardController::index` | Busca os contadores no Docker e renderiza a página. |
 | `POST /dashboard/list` | `DashboardController::list` | JSON `{data: [...]}` para a DataTable. |

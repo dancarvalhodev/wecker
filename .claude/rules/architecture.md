@@ -27,7 +27,7 @@ public/index.php → Bootstrap\Main → routes/web.php → Controller → Servic
 
 ## Routing
 
-`www/routes/web.php` returns `function (App $app)`. Routes use the `[Controller::class, 'method']` array form. Dashboard routes are guarded with `->add(AuthMidleware::class)`. Public: `/`, `/register`, `/login`, `/logout`. Auth-guarded: `/dashboard` (GET) and `/dashboard/{start,stop,list,log,create}` (POST).
+`www/routes/web.php` returns `function (App $app)`. Routes use the `[Controller::class, 'method']` array form. Dashboard routes are guarded with `->add(AuthMidleware::class)`. Public: `/`, `/login`, `/logout` (no public registration; users come from `just admin-create`). Auth-guarded: `/dashboard` (GET) and `/dashboard/{start,stop,list,log,create}` (POST).
 
 ## Layers (`www/src/`)
 
@@ -64,4 +64,4 @@ If none respond it throws `RuntimeException('Docker não acessível')`. `Dashboa
 - `caddy` — HTTP only (`:80`, published on `PORT_HTTP`), config in `config/caddy/Caddyfile`. Mounts only `www/public` (read-only): serves static files and sends everything else to `php:9000` via `php_fastcgi` (front controller `index.php`), setting `APP_ENV=development`. Access logs go to the container output.
 - `php` — Ubuntu 24.04 + `ppa:ondrej/php`, php-fpm 8.5 on port 9000 (`bin/php/Dockerfile`, pool overrides in `bin/php/fpm-pool.conf`), Composer included. Code mounted at **`/var/www/html`**; `config/php/php.ini` is mounted as `conf.d/99-wecker.ini` for both fpm and cli. Also mounts **`/var/run/docker.sock`**; `entrypoint.sh` adds `www-data` to the docker-socket group so PHP can reach the daemon.
 - `postgres` — `DB_*` env, data in `data/postgres`.
-- `redis` — PHP sessions (`session.save_handler = redis` in `php.ini`); exposed on 6379.
+- `redis` — PHP sessions (`session.save_handler = redis`, cookie `SameSite=Strict` as CSRF protection, in `php.ini`). Postgres and Redis publish no host ports.

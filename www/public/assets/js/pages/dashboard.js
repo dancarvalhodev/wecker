@@ -10,7 +10,8 @@ const Dashboard = (function () {
                 },
                 columns: [
                     {
-                        data: 'name'
+                        data: 'name',
+                        render: escapeHtml
                     },
                     {
                         data: 'status',
@@ -33,7 +34,8 @@ const Dashboard = (function () {
                         }
                     },
                     {
-                        data: 'image'
+                        data: 'image',
+                        render: escapeHtml
                     },
                     {
                         data: 'ports',
@@ -117,6 +119,11 @@ const Dashboard = (function () {
                     });
                 }
             });
+        }
+
+        // Container names and images come from Docker and may contain HTML
+        function escapeHtml(text) {
+            return $('<div>').text(text).html();
         }
 
         function defineIcon(statusCode) {

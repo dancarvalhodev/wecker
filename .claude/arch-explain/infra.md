@@ -29,8 +29,8 @@ Um **condomínio**.
 |---|---|---|---|---|
 | `caddy` | `caddy:2.11.7-alpine` | `${PORT_HTTP}:80` | `www/public` (leitura), `Caddyfile` (leitura) | Recebe o HTTP, serve estáticos, repassa o resto ao `php:9000` |
 | `php` | `ubuntu:24.04` + `ppa:ondrej/php` | nenhuma | `www/` → `/var/www/html`, `php.ini`, `docker.sock` | Roda o PHP 8.5 (php-fpm), o Composer e os scripts de `bin/` |
-| `postgres` | `postgres:18-alpine` | `${POSTGRES_PORT}:5432` | `data/postgres` | Banco `wecker` (e `wecker_test`) |
-| `redis` | `redis:8.4-alpine` | `6379:6379` | `data/redis` | Guarda as sessões PHP |
+| `postgres` | `postgres:18-alpine` | nenhuma | `data/postgres` | Banco `wecker` (e `wecker_test`) |
+| `redis` | `redis:8.4-alpine` | nenhuma | `data/redis` | Guarda as sessões PHP |
 
 Os nomes dos containers levam o prefixo `${CONTAINER_NAME}` (`wecker_`): `wecker_php`,
 `wecker_caddy`... Todos têm `restart: always`: sobem de novo sozinhos se caírem ou se o Docker
@@ -81,8 +81,9 @@ o `file_server` o entrega; se não, a requisição vai para o `index.php`.
 
 ## Pegadinhas
 
-- **Postgres e Redis abertos para a rua.** As portas `5432` e `6379` são publicadas no host sem
-  necessidade: o PHP os acessa pela rede interna. O Redis nem tem senha (problema 7, etapa 8).
+- **Postgres e Redis não têm porta para a rua.** Só a rede interna os alcança. Para abrir o banco
+  numa ferramenta do host, use `just shell postgres` (ou publique a porta só na sua máquina, sem
+  versionar).
 - **Montar o `docker.sock` dá poder total.** Quem controla o PHP controla o Docker da máquina
   inteira: pode criar um container com o disco do host montado. Por isso o login e as permissões
   importam tanto.
