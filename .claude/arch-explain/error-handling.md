@@ -41,16 +41,15 @@ O middleware de erro envolve todas as rotas: qualquer exceção não capturada l
 |---|---|---|---|
 | `ValidationException` | `Exception` | 422 | Dados inválidos. Recebe um **array de mensagens** (`getMessages()`). |
 | `UserException` | `ValidationException` | 422 | Erros de usuário (ex.: `['Wrong password.']`). |
-| `DockerException` | `ValidationException` | 422 | Erros vindos do Docker (ex.: `['Docker containers not found']`). |
 
-Por herdarem de `ValidationException`, as três são tratadas do mesmo jeito pelo handler.
+Por herdar de `ValidationException`, a `UserException` é tratada do mesmo jeito pelo handler.
 
 ### O que o handler responde (`HttpErrorHandler::respond()`)
 
 | Exceção | Status | `error` |
 |---|---|---|
 | `ValidationException` e filhas | o código da exceção (422) | o array de mensagens: `["Wrong password."]` |
-| `HttpException` | o código da exceção | `[mensagem]` |
+| `Slim\Exception\HttpException` (404, 405) | o código da exceção | `[mensagem]`, ex.: `["Not found."]` |
 | qualquer outra | 500 | `"Internal Server Error"` (texto, não array) |
 
 ```json
@@ -67,15 +66,10 @@ Com `logErrors` e `logErrorDetails` ligados, o Slim grava a mensagem e o stack t
 
 ## Pegadinhas
 
-- **`HttpException` é a classe errada.** O `use HttpException;` aponta para uma classe global da
-  extensão PECL `http`, que nem está instalada. A do Slim é `Slim\Exception\HttpException`. Por
-  isso, um 404 (rota inexistente) ou um 405 (método errado) do Slim cai no "qualquer outra" e vira
-  **500** (problema 5 do plano, etapa 9).
-- **`error` muda de tipo.** É array nos casos tipados e texto no 500. Quem lê no JavaScript precisa
-  tratar os dois.
-- **O JS procura no lugar errado.** `login.js` lê `response.messages` no callback
-  de *sucesso*, mas os erros vêm em `error` e com status 4xx, que cai no callback `error` (problema
-  12). Resultado: o usuário só vê "A internal error occurred".
+- **`HttpException` é a do Slim.** Um `use HttpException;` sem namespace apontaria para uma classe
+  global da extensão PECL `http`, e os 404/405 virariam 500.
+- **`error` muda de forma.** Pode ser uma lista (`["Not found."]`), um objeto por campo
+  (`{"email": "..."}`, do `LoginValidator`) ou um texto (no 500). O `login.js` trata os três.
 - **Toda validação gera um stack trace no log.** Um login com senha errada é uma
   `UserException`, e o Slim registra o trace completo. É ruído, não um bug.
 - **`displayErrorDetails` não tem efeito.** O `respond()` customizado nunca inclui os detalhes,
@@ -88,5 +82,5 @@ Com `logErrors` e `logErrorDetails` ligados, o Slim grava a mensagem e o stack t
 ```bash
 docker compose logs -f php                               # erros e stack traces ao vivo
 curl -s -d 'email=x@y.z&password=a' http://localhost/login   # um 422 de exemplo
-curl -s -i http://localhost/nao-existe                   # o 404 que vira 500
+curl -s -i http://localhost/nao-existe                   # um 404
 ```

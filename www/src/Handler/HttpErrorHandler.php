@@ -3,8 +3,8 @@
 namespace App\Handler;
 
 use App\Exception\ValidationException;
-use HttpException;
 use Psr\Http\Message\ResponseInterface;
+use Slim\Exception\HttpException;
 use Slim\Handlers\ErrorHandler;
 
 class HttpErrorHandler extends ErrorHandler
@@ -28,7 +28,7 @@ class HttpErrorHandler extends ErrorHandler
 
         $payload = [
             'success' => false,
-            'error' => $message
+            'error' => $message,
         ];
 
         $response = $this->responseFactory->createResponse($status);

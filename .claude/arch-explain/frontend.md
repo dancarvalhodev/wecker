@@ -107,13 +107,8 @@ a checagem do navegador é conforto, não segurança.
 - **Escape o que vem do Docker.** A DataTable insere o `render` como HTML. `name` e `image` passam
   por `escapeHtml()`; um campo novo vindo do Docker precisa do mesmo cuidado, senão um container
   chamado `<img src=x onerror=alert(1)>` executa código na página.
-- **`Create.init()` não existe.** O `dashboard/index.html.twig` chama um módulo `Create` que não
-  foi escrito, e isso gera um erro no console em toda abertura do dashboard (problema 14; o módulo
-  nasce na etapa 11).
-- **Erros de validação não aparecem.** Ver [error-handling.md](error-handling.md): o JS procura
-  `response.messages` no callback errado.
-- **`'arroz'`.** Se o log vier vazio, o modal mostra a palavra `arroz`, um placeholder esquecido
-  (problema 10).
+- **Erro chega no callback `error`.** Respostas 4xx/5xx não passam pelo `success` do `$.ajax`; leia
+  `xhr.responseJSON.error` (ver [error-handling.md](error-handling.md)).
 - **Caminhos relativos.** O `base.html.twig` usa `assets/...` sem `/` inicial. Funciona porque
   todas as páginas estão na raiz (`/dashboard`, `/login`); uma página em `/users/edit` buscaria
   `/users/assets/...`.

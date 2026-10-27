@@ -33,8 +33,8 @@ Um **condomínio**.
 | `redis` | `redis:8.4-alpine` | nenhuma | `data/redis` | Guarda as sessões PHP |
 
 Os nomes dos containers levam o prefixo `${CONTAINER_NAME}` (`wecker_`): `wecker_php`,
-`wecker_caddy`... Todos têm `restart: always`: sobem de novo sozinhos se caírem ou se o Docker
-reiniciar.
+`wecker_caddy`... Nenhum tem política de `restart`: depois de reiniciar a máquina, suba com
+`just up`.
 
 ### As duas configurações de ambiente
 
@@ -73,7 +73,7 @@ O `just setup` cria os dois a partir dos exemplos. Os dois estão no `.gitignore
 | `@trailingSlash` + `redir ... 301` | `/login/` → `/login`, exceto se o caminho for um arquivo real. |
 | `@hidden path */.ht*` + `respond 403` | Bloqueia `.htaccess` e afins. |
 | `@static` + `header Cache-Control` | Cache de 1 ano para CSS, JS, imagens e fontes. |
-| `php_fastcgi php:9000 { env APP_ENV development }` | Repassa ao php-fpm e define o `APP_ENV`. |
+| `php_fastcgi php:9000` | Repassa ao php-fpm. |
 | `file_server` | Entrega os arquivos estáticos. |
 
 O `php_fastcgi` já implementa o padrão "front controller": se o arquivo pedido existe em `public/`,
@@ -90,9 +90,11 @@ o `file_server` o entrega; se não, a requisição vai para o `index.php`.
 - **Editou o `php.ini` ou o `Caddyfile`? Recrie, não reinicie.** São arquivos únicos montados, e no
   Docker Desktop com WSL o mount fica preso ao arquivo antigo quando o editor salva um arquivo novo.
   `docker compose restart php` falha; use `docker compose up -d --force-recreate php` (ou `caddy`).
-- **Depois de reiniciar a máquina,** `php` e `caddy` podem ficar `Exited (127)` sem log, e o
-  Postgres pode gravar fora de `data/postgres`. Hipótese: o Docker sobe os containers antes de as
-  pastas do WSL estarem montadas. `just up` resolve na hora (pendência no `handoff.md`).
+- **Não volte com o `restart: always`.** No Docker Desktop com WSL, ele faz os containers subirem
+  no boot antes de as pastas do projeto estarem disponíveis: as montagens caem em diretórios vazios
+  da VM, o `php` e o `caddy` ficam `Exited (127)` e o Postgres cria um banco novo fora de
+  `data/postgres` (os dados reais continuam lá, intactos). Recriar o container
+  (`docker compose up -d --force-recreate`) volta a apontar para a pasta certa.
 - **`depends_on` só ordena a subida.** Não espera o serviço estar pronto. Por isso o `just migrate`
   usa o `_wait-db` antes de falar com o Postgres (ver [migrations.md](migrations.md)).
 - **Xdebug não liga sozinho.** Em modo `trigger`, só depura com o cookie ou o parâmetro

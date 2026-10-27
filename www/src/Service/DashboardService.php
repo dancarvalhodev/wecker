@@ -2,17 +2,15 @@
 
 namespace App\Service;
 
-use App\Exception\DockerException;
 use App\Service\Api\DockerClient;
 use GuzzleHttp\Exception\GuzzleException;
-use function PHPUnit\Framework\matches;
 
 class DashboardService
 {
-    const string RUNNING_STATE = 'running';
-    const array STOPPED_STATES = ['exited', 'created', 'dead'];
+    public const string RUNNING_STATE = 'running';
+    public const array STOPPED_STATES = ['exited', 'created', 'dead'];
 
-    const SYSTEM_IMAGE_SUFIX = 'wecker';
+    public const SYSTEM_IMAGE_SUFIX = 'wecker';
 
     /** @var DockerClient $dockerClient */
     private DockerClient $dockerClient;
@@ -23,40 +21,26 @@ class DashboardService
     }
 
     /**
-     * @return array
-     * @throws DockerException
+     * @return array{running: int, stopped: int, total: int}
      * @throws GuzzleException
      */
     public function getDockerStats(): array
     {
-        $containers = $this->dockerClient->getContainers();
-
-        if (!$containers) {
-            throw new DockerException(['Docker containers not found']);
-        }
-
-        return $this->processStats($containers);
+        return $this->processStats($this->dockerClient->getContainers() ?? []);
     }
 
     /**
-     * @return array
-     * @throws DockerException
+     * @return array{data: list<array<string, mixed>>}
      * @throws GuzzleException
      */
     public function getDockerContainerData(): array
     {
-        $containers = $this->dockerClient->getContainers();
-
-        if (!$containers) {
-            throw new DockerException(['Docker containers not found']);
-        }
-
-        return $this->processContainers($containers);
+        return $this->processContainers($this->dockerClient->getContainers() ?? []);
     }
 
     /**
      * @param string $id
-     * @return array
+     * @return array{status: int, message: string}
      * @throws GuzzleException
      */
     public function startContainer(string $id): array
@@ -78,7 +62,7 @@ class DashboardService
 
     /**
      * @param string $id
-     * @return array
+     * @return array{status: int, message: string}
      * @throws GuzzleException
      */
     public function stopContainer(string $id): array
@@ -100,7 +84,7 @@ class DashboardService
 
     /**
      * @param string $id
-     * @return array
+     * @return array{status: int, message: string}
      * @throws GuzzleException
      */
     public function logs(string $id): array
@@ -114,8 +98,8 @@ class DashboardService
     }
 
     /**
-     * @param array $containers
-     * @return array
+     * @param list<object> $containers
+     * @return array{data: list<array<string, mixed>>}
      */
     private function processContainers(array $containers): array
     {
@@ -126,18 +110,12 @@ class DashboardService
                 continue;
             }
 
-            $ports = null;
-
-            if (isset($container->Ports[0]) && isset($container->Ports[1]) && isset($container->Ports[0]->PublicPort)) {
-                $ports = $container->Ports[0]->PublicPort . ':' . $container->Ports[1]->PrivatePort;
-            }
-
             $data[] = [
                 'id' => $container->Id,
                 'name' => $container->Names[0],
                 'status' => $container->State,
                 'image' => $container->Image,
-                'ports' => $ports,
+                'ports' => $this->formatPorts($container->Ports ?? []),
             ];
         }
 
@@ -147,8 +125,32 @@ class DashboardService
     }
 
     /**
-     * @param array $containers
-     * @return array
+     * Published ports as "host:container", e.g. "8081:80, 8443:443"; null when none is published.
+     * Docker lists each mapping once per IP (0.0.0.0 and ::), hence the de-duplication.
+     *
+     * @param list<object> $ports
+     * @return string|null
+     */
+    private function formatPorts(array $ports): ?string
+    {
+        $mappings = [];
+
+        foreach ($ports as $port) {
+            if (isset($port->PublicPort)) {
+                $mappings[] = $port->PublicPort . ':' . $port->PrivatePort;
+            }
+        }
+
+        if ($mappings === []) {
+            return null;
+        }
+
+        return implode(', ', array_unique($mappings));
+    }
+
+    /**
+     * @param list<object> $containers
+     * @return array{running: int, stopped: int, total: int}
      */
     private function processStats(array $containers): array
     {
@@ -174,7 +176,7 @@ class DashboardService
         return [
             'running' => $running,
             'stopped' => $stopped,
-            'total' => $total
+            'total' => $total,
         ];
     }
 }

@@ -94,7 +94,7 @@ const Dashboard = (function () {
                     let icon = defineIcon(jqXHR.status);
 
                     if (type === 'log') {
-                        $('#logContent').text((response[0] && response[0] !== '') ? response[0] : 'arroz');
+                        $('#logContent').text(response[0] || 'No logs yet.');
 
                         const modal = new bootstrap.Modal(document.getElementById('logModal'));
                         modal.show();

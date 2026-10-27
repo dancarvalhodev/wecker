@@ -48,8 +48,7 @@ $(document).on('click', '.start-container', function (e) {
 ### 2. No Caddy (`config/caddy/Caddyfile`)
 
 `/dashboard/start` não é um arquivo de `www/public`. Então o `php_fastcgi php:9000` repassa a
-requisição ao container `php`, pela porta 9000, mandando executar `index.php` e definindo
-`APP_ENV=development`.
+requisição ao container `php`, pela porta 9000, mandando executar `index.php`.
 
 ### 3. A entrada (`www/public/index.php`)
 
@@ -138,7 +137,6 @@ Qualquer exceção, em qualquer camada, sobe até o middleware de erro do Slim, 
 | `GET /dashboard` | `DashboardController::index` | Busca os contadores no Docker e renderiza a página. |
 | `POST /dashboard/list` | `DashboardController::list` | JSON `{data: [...]}` para a DataTable. |
 | `POST /dashboard/{start,stop,log}` | `DashboardController::start/stop/log` | Ações num container (`id` no corpo). |
-| `POST /dashboard/create` | — | Aponta para um método que não existe (problema 14 do plano). |
 
 Todas as rotas `/dashboard*` passam pelo `AuthMidleware`.
 
@@ -149,9 +147,8 @@ Todas as rotas `/dashboard*` passam pelo `AuthMidleware`.
   precisa sobreviver vai para a sessão (Redis) ou para o banco.
 - **O caminho que o Caddy enxerga não é o do PHP.** O Caddy só monta `www/public`. Um arquivo fora
   dali (`www/src`, `www/.env`) não pode ser servido por engano, porque o Caddy nem o enxerga.
-- **`APP_ENV` vem do Caddy.** `App::isProduction()` lê `getenv('APP_ENV')`, que é preenchido pelo
-  `env APP_ENV development` do Caddyfile. Num script de terminal (`bin/`), ele fica vazio; nos
-  testes, vem do `phpunit.xml` (`testing`).
+- **`APP_ENV` vem do `www/.env`.** `App::isProduction()` lê `$_ENV['APP_ENV']`, carregado pelo
+  Dotenv, igual na web e no terminal; nos testes, o `phpunit.xml` define `testing`.
 
 ## Comandos úteis
 

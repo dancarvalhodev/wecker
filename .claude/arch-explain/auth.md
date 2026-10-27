@@ -87,9 +87,8 @@ navegador, mas aponta para nada.
   ainda monta todo usuário como `ROLE_USER` (etapa 12).
 - **Não há cadastro pela web.** O `/register` saiu na etapa 8; até a etapa 12, usuários só pelo
   `just admin-create`.
-- **A mensagem de erro do login não aparece.** O 422 cai no callback `error` do `login.js`, que
-  mostra "A internal error occurred"; e o código procura os erros em `response.messages`, mas o
-  servidor manda em `error` (problema 12).
+- **O erro do login chega no callback `error`.** O 422 não passa pelo `success` do `login.js`; a
+  mensagem vem em `xhr.responseJSON.error`.
 - **CSRF via `SameSite=Strict`, sem token.** O `php.ini` marca o cookie de sessão como
   `SameSite=Strict`: o navegador não o envia em requisições vindas de outro site, então um `POST`
   forjado chega sem login. Efeito colateral: quem chega ao Wecker por um link de outro site vê a

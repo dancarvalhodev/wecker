@@ -95,14 +95,11 @@ garante que as respostas tenham sempre o mesmo formato, mesmo se o Docker for at
 - **A descoberta roda em toda requisição que usa o Docker.** O container de DI monta o
   `DockerClient` uma vez por requisição, e o PHP não guarda nada entre requisições. São até três
   `_ping` por requisição do dashboard (no Linux, os dois primeiros falham rápido).
-- **Lista vazia vira erro.** Sem nenhum container, `getContainers()` devolve `[]`, e o `if
-  (!$containers)` do service lança "Docker containers not found": o dashboard quebra (problema 8).
-- **Portas montadas errado.** `Ports[0]->PublicPort . ':' . Ports[1]->PrivatePort` mistura duas
-  entradas diferentes da lista (problema 9).
-- **Logs com bytes estranhos.** Sem TTY, o Docker envia os logs multiplexados: cada bloco começa
-  com um cabeçalho binário de 8 bytes, que aparece como lixo no modal (problema 10). O
-  `header('Content-Type: text/plain')` dentro do `logs()` também não tem efeito útil, porque a
-  resposta final é montada pelo controller como JSON.
+- **Cada porta aparece duas vezes.** O Docker lista cada mapeamento uma vez por IP (`0.0.0.0` e
+  `::`), e alguns containers vêm com `Ports: null`. O `formatPorts()` trata os dois casos.
+- **Logs vêm multiplexados.** Sem TTY, o Docker manda stdout e stderr intercalados, cada bloco atrás
+  de um cabeçalho binário de 8 bytes (`Content-Type: ...multiplexed-stream`). O
+  `DockerClient::demultiplex()` tira os cabeçalhos; sem isso, o modal mostra lixo.
 - **Filtrar pela imagem é frágil.** Uma imagem reconstruída deixa o container antigo apontando
   para um `sha256:...` sem nome, que não contém `wecker` e passa a aparecer na tabela.
 - **`request('GET', ...)`, não `get(...)`.** O `ClientInterface` do Guzzle só declara `request()`;

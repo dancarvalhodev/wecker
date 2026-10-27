@@ -19,6 +19,7 @@ class DockerClient
     }
 
     /**
+     * @return list<object>|null
      * @throws GuzzleException
      */
     public function getContainers(): array|null
@@ -29,7 +30,7 @@ class DockerClient
             ],
         ]);
 
-        return $res->getBody() ? json_decode($res->getBody()->getContents()) : null;
+        return json_decode((string) $res->getBody());
     }
 
     /**
@@ -53,6 +54,7 @@ class DockerClient
     }
 
     /**
+     * @return array{statusCode: int, body: string}
      * @throws GuzzleException
      */
     public function logs(string $id): array
@@ -65,11 +67,35 @@ class DockerClient
             ],
         ]);
 
-        header('Content-Type: text/plain');
+        $body = (string) $res->getBody();
+
+        // Without a TTY, Docker sends stdout/stderr interleaved, each chunk behind an 8-byte header.
+        if (str_contains($res->getHeaderLine('Content-Type'), 'multiplexed-stream')) {
+            $body = $this->demultiplex($body);
+        }
 
         return [
             'statusCode' => $res->getStatusCode(),
-            'body' => $res->getBody() ? $res->getBody()->getContents() : null,
+            'body' => $body,
         ];
+    }
+
+    /**
+     * Each chunk: 1 byte stream type, 3 zero bytes, 4 bytes big-endian payload size, then the payload.
+     *
+     * @param string $stream
+     * @return string
+     */
+    private function demultiplex(string $stream): string
+    {
+        $output = '';
+
+        while (strlen($stream) >= 8) {
+            $size = unpack('N', substr($stream, 4, 4))[1];
+            $output .= substr($stream, 8, $size);
+            $stream = substr($stream, 8 + $size);
+        }
+
+        return $output;
     }
 }

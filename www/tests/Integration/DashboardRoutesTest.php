@@ -20,6 +20,16 @@ final class DashboardRoutesTest extends IntegrationTestCase
         $this->assertSame('running', $this->statusInList($id));
     }
 
+    public function testLogsShowWhatTheContainerPrinted(): void
+    {
+        $this->login();
+        $id = $this->createRunningContainer();
+
+        $response = $this->request('POST', '/dashboard/log', ['id' => $id]);
+
+        $this->assertSame(["hello\n"], json_decode((string) $response->getBody(), true));
+    }
+
     public function testInvalidContainerIdIsRejected(): void
     {
         $this->expectErrorLog();

@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Exception\DockerException;
 use App\Exception\ValidationException;
 use App\Service\DashboardService;
 use GuzzleHttp\Exception\GuzzleException;
@@ -33,7 +32,6 @@ class DashboardController extends AbstractController
      * @throws LoaderError
      * @throws RuntimeError
      * @throws SyntaxError
-     * @throws DockerException
      */
     public function index(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
@@ -52,7 +50,6 @@ class DashboardController extends AbstractController
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
      * @return ResponseInterface
-     * @throws DockerException
      * @throws GuzzleException
      */
     public function list(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface

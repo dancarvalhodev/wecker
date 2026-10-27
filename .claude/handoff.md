@@ -10,7 +10,13 @@ sessão atualiza este arquivo; quem começar lê este arquivo primeiro.
 - **Plano:** `.claude/plans/v2.md` (branch `feature/v2`), executado com a skill `modo-codando`.
   Revisado em 2026-10-26 (MVP): restam as etapas **8 Segurança essencial**, **9 Bugs visíveis**,
   **10 Revamp visual**, **11 Criar container pela UI** e **12 Usuários e papéis fixos**.
-- **Etapa 8:** entregue em 2026-10-26, aguardando conferência. Postgres e Redis sem porta no host
+- **Etapa 8:** confirmada em 2026-10-27. Testes passaram a usar o Docker real.
+- **Etapa 9:** entregue em 2026-10-27, aguardando conferência. `APP_ENV` agora vem do `www/.env`
+  (`$_ENV`), não mais do Caddyfile.
+- **Banco "sumindo" depois de reiniciar (resolvido em 2026-10-27):** a causa era o
+  `restart: always` (o Docker Desktop subia os containers antes de o WSL expor as pastas, e o
+  Postgres gravava numa pasta fantasma da VM). Saiu do `docker-compose.yml`; após reiniciar, rode
+  `just up`. Postgres e Redis sem porta no host
   (`POSTGRES_PORT` saiu do `env-example`).
 - **Feito (1–7):** skill `modo-codando`; PHPUnit/PHPStan/PHP-CS-Fixer; `justfile`; migrações
   (`Migrator`, `just migrate`, `just admin-create`); PHP em Ubuntu 24.04 + Caddy; `arch-explain/`;
@@ -69,10 +75,6 @@ O plano tem o detalhe; aqui só o resumo.
 
 ## Pendências conhecidas
 
-- **Containers depois de reiniciar a máquina (visto em 2026-10-21 e 2026-10-23):** `php` e
-  `nginx` (hoje `caddy`) ficam `Exited (127)` sem log, e o `postgres` sobe mas grava fora de `data/postgres`
-  (as migrações feitas no dia 21 não estavam lá no dia 23). Hipótese: o Docker sobe os containers
-  antes de as pastas do WSL estarem montadas. `just up` resolve na hora; falta investigar a causa.
 - **Mount de arquivo único no Docker Desktop/WSL:** depois de editar `config/php/php.ini` ou o
   `Caddyfile`, `docker compose restart` falha; use `docker compose up -d --force-recreate <serviço>`.
 

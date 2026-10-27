@@ -19,9 +19,7 @@
 	@static path *.ico *.css *.js *.jpg *.jpeg *.JPG *.png *.svg *.woff
 	header @static Cache-Control "public, max-age=31536000"
 
-	php_fastcgi php:9000 {
-		env APP_ENV development
-	}
+	php_fastcgi php:9000
 
 	file_server
 }
