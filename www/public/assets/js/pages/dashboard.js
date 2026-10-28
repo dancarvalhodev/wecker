@@ -10,30 +10,20 @@ const Dashboard = (function () {
                 },
                 columns: [
                     {
-                        data: 'name'
+                        data: 'name',
+                        render: data => `<span class="wk-mono-strong">${escapeHtml(data)}</span>`
                     },
                     {
                         data: 'status',
                         render: function (data) {
-                            let color = 'bg-danger';
+                            const modifier = data === 'running' ? ' wk-status--running' : '';
 
-                            if (data === 'running') {
-                                color = 'bg-success';
-                            }
-
-                            if (data === 'paused') {
-                                color = 'bg-warning';
-                            }
-
-                            if (data === 'restarting') {
-                                color = 'bg-info';
-                            }
-
-                            return `<span class="badge ${color}">${data}</span>`;
+                            return `<span class="wk-status${modifier}">${escapeHtml(data)}</span>`;
                         }
                     },
                     {
-                        data: 'image'
+                        data: 'image',
+                        render: escapeHtml
                     },
                     {
                         data: 'ports',
@@ -46,14 +36,14 @@ const Dashboard = (function () {
                             let button = '';
 
                             if (row.status === 'running') {
-                                button = `<button data-id="${row.id}" class="btn btn-sm btn-outline-danger stop-container">Stop</button>`;
+                                button = `<button type="button" data-id="${row.id}" class="btn btn-sm btn-outline-stop stop-container">Stop</button>`;
                             } else {
-                                button = `<button data-id="${row.id}" class="btn btn-sm btn-outline-success start-container">Start</button>`;
+                                button = `<button type="button" data-id="${row.id}" class="btn btn-sm btn-primary start-container">Start</button>`;
                             }
 
                             return `
                                 ${button}
-                                <button data-id="${row.id}" class="btn btn-sm btn-outline-secondary log">Logs</button>
+                                <button type="button" data-id="${row.id}" class="btn btn-sm btn-outline-muted log">Logs</button>
                             `;
                         }
                     }
@@ -92,7 +82,7 @@ const Dashboard = (function () {
                     let icon = defineIcon(jqXHR.status);
 
                     if (type === 'log') {
-                        $('#logContent').text((response[0] && response[0] !== '') ? response[0] : 'arroz');
+                        $('#logContent').text(response[0] || 'No logs yet.');
 
                         const modal = new bootstrap.Modal(document.getElementById('logModal'));
                         modal.show();
@@ -117,6 +107,11 @@ const Dashboard = (function () {
                     });
                 }
             });
+        }
+
+        // Container names and images come from Docker and may contain HTML
+        function escapeHtml(text) {
+            return $('<div>').text(text).html();
         }
 
         function defineIcon(statusCode) {

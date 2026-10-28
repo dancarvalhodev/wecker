@@ -1,57 +1,76 @@
-# PHP Code Style & Conventions
+# Estilo e convenções de PHP
 
-Target runtime is **PHP 8.5**. Match the surrounding file — the codebase is internally consistent.
+Alvo: **PHP 8.5**. Siga o arquivo ao redor: o código é consistente internamente.
 
-## Namespacing & layout
+## Clareza acima de esperteza
 
-- PSR-4: `App\` → `www/src/`, `App\Bootstrap\` → `www/bootstrap/` (see `www/composer.json`).
-- One class per file, class name matches file name. **Exception:** `App\Service\AuthMidleware` keeps that (mis)spelling — don't "fix" it without renaming everywhere.
-- Domain sub-namespaces group related classes: `Service\User\Validator`, `Service\User\Normalizer`, `Service\Api`, `Repository\User`, `Model\User`.
+O código precisa ser fácil de ler para um dev júnior ou pleno. Use um recurso da linguagem só quando ele deixa o código *mais fácil de ler* que a alternativa, não porque é novo ou mais curto. Antes de usar, pergunte: alguém novo no projeto entende na primeira leitura? Remove código ou risco, ou só rearruma? Combina com o resto do código?
 
-## Naming
+- Prefira uma variável nomeada por passo a uma cadeia longa de `|>` ou chamadas aninhadas.
+- Prefira um `if` simples a ternários aninhados ou `?:`/`??` encadeados.
+- Prefira um método explícito a uma closure guardada em constante ou a um property hook que só encurta um getter claro.
+- Poucos comentários: só o *porquê* que o código não mostra.
 
-- Suffix classes by role: `*Controller`, `*Service`, `*Repo`, `*Model`, `*Validator`, `*Normalizer`, `*Exception`, `Entity` classes are bare nouns (`User`, `Role`).
-- Abstract base classes are prefixed `Abstract*` (`AbstractController`, `AbstractModel`, `AbstractRepo`).
-- Methods and properties are `camelCase`; class constants are `UPPER_SNAKE_CASE`.
+## Namespaces e organização
 
-## Types & PHP 8.5 idioms in use
+- PSR-4: `App\` → `www/src/`, `App\Bootstrap\` → `www/bootstrap/`, `Tests\` → `www/tests/` (ver `www/composer.json`).
+- Uma classe por arquivo, com o mesmo nome. **Exceção:** `App\Service\AuthMidleware` mantém a grafia errada; não "corrija" sem renomear em todo lugar.
+- Sub-namespaces por domínio: `Service\User\Validator`, `Service\User\Normalizer`, `Service\Api`, `Repository\User`, `Model\User`.
+- Lógica fica em classes de `src/`; os scripts de `www/bin/` só leem argumentos, chamam uma classe e imprimem pelo `App\Console\Terminal`.
 
-- Typed properties and typed constructor params everywhere; nullable via `?Type`.
-- **Typed class constants**: `const string RUNNING_STATE = ...`, `const array STOPPED_STATES = [...]`.
-- `new Main()->run()` — calling a method directly on `new` without wrapping parens.
-- `match ($x) { 204 => '...', default => '...' }` for mapping (e.g. Docker status code → message).
-- Default constructor args can be `new` expressions (`Carbon $createdAt = new Carbon()`).
-- `declare(strict_types=1)` appears in entrypoints/routes but is **not** applied uniformly across `src/`; add it to new files where it fits the neighbours.
+## Nomes
+
+- Sufixo pelo papel: `*Controller`, `*Service`, `*Repo`, `*Model`, `*Validator`, `*Normalizer`, `*Exception`, `*Factory`. Entidades são substantivos simples (`User`, `Role`).
+- Classes abstratas começam com `Abstract*` (`AbstractController`, `AbstractModel`, `AbstractRepo`).
+- Métodos e propriedades em `camelCase`; constantes de classe em `UPPER_SNAKE_CASE`.
+- Métodos com nome de ação (`extractContainerId()`, não `containerId()`).
+
+## Tipos e recursos do PHP 8.5 em uso
+
+- Propriedades e parâmetros de construtor sempre tipados; nulável com `?Type`.
+- **Constantes tipadas**: `const string RUNNING_STATE = ...`.
+- `new Main()->run()`: método direto no `new`, sem parênteses extras.
+- `match ($x) { 204 => '...', default => '...' }` para mapear valores.
+- Argumento padrão com `new` (`Carbon $createdAt = new Carbon()`).
+- `declare(strict_types=1)` está nos arquivos novos e nas entradas, mas **não** em todo o `src/`; coloque nos arquivos novos.
 
 ## PHPDoc
 
-Methods carry full docblocks with `@param`, `@return`, and `@throws` even when the signature is already typed. Properties often carry a redundant `/** @var Type $name */`. Keep this style — it's consistent across the code.
+Métodos têm docblock completo com `@param`, `@return` e `@throws`, mesmo com a assinatura tipada. Propriedades costumam ter um `/** @var Type $name */` redundante. Mantenha esse estilo.
 
-## Dependency injection
+## Injeção de dependência
 
-Prefer **constructor injection** with typed params; PHP-DI autowires them. Assign each dependency to a private typed property in the constructor.
+Prefira **injeção pelo construtor** com parâmetros tipados; o PHP-DI faz o autowiring. Guarde cada dependência numa propriedade privada tipada.
 
-⚠️ Some existing classes bypass DI and `new` their collaborators directly (e.g. `DashboardController::__construct` receives a `DashboardService` but ignores it and does `new DashboardService()`, which in turn does `new DockerClient()`). This is an inconsistency, not the intended pattern — prefer using the injected dependency in new code, and follow the existing file's style when editing it.
+Nunca faça `new` de um colaborador dentro de uma classe (ex.: `new DockerClient()` num service). Objetos que precisam de preparo em tempo de execução ganham uma factory e uma definição em `config/*.php` (ver `DockerClientFactory` + `config/docker.php`).
 
-## Data access (repositories)
+## Acesso a dados (repositories)
 
-- Extend `AbstractRepo`; use the injected DBAL `Connection`. **Raw parameterized SQL only — no ORM/query builder.**
-- Always use placeholders (`?` positional or `:named`) — never interpolate user input into SQL.
-- Writes: wrap in `beginTransaction()` / `commit()`, `catch` → `rollback()`, `error_log($e)`, rethrow.
-- Implement `hydrate(array $data): object` to turn a row into an `Entity`; timestamps become `Carbon` instances.
+- Estenda `AbstractRepo` e use a `Connection` do DBAL injetada. **Só SQL parametrizado, sem ORM nem query builder.**
+- Sempre placeholders (`?` ou `:nome`); nunca interpole entrada do usuário no SQL.
+- Escritas: `beginTransaction()` / `commit()`, e no `catch` → `rollback()`, `error_log($e)` e relançar.
+- `hydrate(array $data)` transforma a linha numa entidade; datas viram `Carbon`.
 
-## Validation & normalization
+## Validação e normalização
 
-- Normalize input first (`GeneralNormalizer::clean()` trims all values and lowercases `email`), then validate.
-- Validators use `respect/validation` (imported as `use Respect\Validation\ValidatorBuilder as v;`).
-- **Convention to follow: validators should `throw new ValidationException($errors)` on failure** — `LoginValidator` does this correctly. `RegisterValidator` instead *returns* an error array and its caller ignores it (a latent bug); prefer the throwing style for new/changed validators.
+- Normalize primeiro (`GeneralNormalizer::clean()` tira espaços e põe o `email` em minúsculas), depois valide.
+- Validators usam `respect/validation` (`use Respect\Validation\ValidatorBuilder as v;`).
+- Validators **lançam `ValidationException($errors)`** na falha; o `LoginValidator` é a referência.
+- Dado de requisição que vai para uma URL ou caminho é validado antes (ex.: id de container só hex, `ctype_xdigit`).
 
-## Errors & result shapes
+## Erros e formato de resposta
 
-- Throw the typed `App\Exception\*` classes (constructed with a **message array** and, via the base, an HTTP status). `HttpErrorHandler` turns them into JSON.
-- Service methods that wrap external calls return associative arrays shaped `['status' => int, 'message' => mixed]`; controllers pass these into `returnWithJson($response, [$msg], $status)`.
-- Controllers return JSON via `AbstractController::returnWithJson()` / `returnWithSuccess()`, or render Twig.
+- Lance as exceções tipadas de `App\Exception\*` (com um **array de mensagens**); o `HttpErrorHandler` as transforma em JSON `{success: false, error: [...]}`.
+- Services que chamam algo externo devolvem `['status' => int, 'message' => mixed]`; o controller repassa com `returnWithJson($response, [$msg], $status)`.
+- Controllers devolvem JSON (`returnWithJson()` / `returnWithSuccess()`) ou renderizam Twig.
 
-## Language in strings
+## Frontend
 
-Code, identifiers, and user-facing strings are **English**. A few internal messages/log comments are Portuguese (e.g. the `DockerClient` runtime error). Keep new user-facing text English to match the templates and UI.
+- Templates Twig estendem `layout/base.html.twig`; o bloco `scripts` chama `{{ parent() }}` primeiro.
+- Cada página tem um módulo JS em `public/assets/js/pages/`, no padrão IIFE que devolve `{ init }`.
+- Todo texto vindo do Docker inserido como HTML passa por `escapeHtml()`.
+- Não edite as bibliotecas em `public/assets/js/{jquery,boostrap,datatables,sweetalert2}/` (a pasta é `boostrap` mesmo).
+
+## Idioma
+
+Código, identificadores e textos de interface em **inglês**. Documentação e conversa em **português**.

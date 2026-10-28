@@ -14,28 +14,18 @@ const Login = (function () {
                 url: '/login',
                 type: 'POST',
                 data: formData,
-                success: function(response) {
-                    if (!response.success) {
-                        const errorList = Object.values(response.messages)
-                            .map(message => `<li>${message}.</li>`)
-                            .join('');
-
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Ops! There are some validation errors.',
-                            html: `<ul style="text-align:left">${errorList}</ul>`
-                        });
-
-                        return
-                    }
-
+                success: function() {
                     window.location.href = "/dashboard";
                 },
-                error: function() {
+                error: function(xhr) {
+                    // error is a list, a {field: message} object, or a plain string on a 500
+                    const error = xhr.responseJSON ? xhr.responseJSON.error : 'An internal error occurred';
+                    const messages = typeof error === 'object' ? Object.values(error) : [error];
+
                     Swal.fire({
-                      icon: "error",
-                      title: "It`s a shame",
-                      text: 'A internal error occurred',
+                        icon: 'error',
+                        title: 'Could not log in',
+                        text: messages.join(' '),
                     });
                 }
             });

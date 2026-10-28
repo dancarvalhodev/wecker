@@ -1,52 +1,42 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Orientações para o Claude Code (claude.ai/code) neste repositório.
 
-## What this is
+## O que é
 
-Wecker is a Portainer-inspired web UI for managing Docker containers. A PHP (Slim 4) app talks to the Docker Engine HTTP API to list/start/stop containers and read logs, behind a session-based login. The whole stack (nginx, php-fpm, postgres, redis) runs via Docker Compose. Application code lives under `www/`.
+Wecker é uma interface web, inspirada no Portainer, para gerenciar containers Docker. Um app PHP (Slim 4) fala com a API HTTP do Docker Engine para listar, iniciar e parar containers e ler logs, atrás de um login por sessão. A stack inteira (caddy, php-fpm, postgres, redis) roda no Docker Compose. O código da aplicação fica em `www/`.
 
-## Commands
+## Comandos
 
-All infra commands run through the `run.sh` wrapper (from repo root):
-
-```bash
-./run.sh setup   # copy env-example -> .env and www/env-example -> www/.env (run once)
-./run.sh up      # docker compose up -d --build; app served at http://localhost
-./run.sh stop    # docker compose down
-./run.sh logs    # tail all container logs
-./run.sh reset   # down -v + prune project containers/images
-./run.sh nuke    # down -v + docker system prune -af --volumes (destroys ALL docker state)
-```
-
-First-run bootstrap also requires loading `docs/database.sql` into the postgres db (creates `roles`/`users`, seeds `admin@admin.com`). See README for the full sequence.
-
-Composer / tests run **inside the php container** (php 8.5, Alpine):
+Tudo passa pelo `justfile` ([just](https://just.systems), na raiz). `just` sem argumentos lista as receitas:
 
 ```bash
-docker compose exec php composer install               # deps land in www/vendor
-docker compose exec php ./vendor/bin/phpunit           # run all tests
-docker compose exec php ./vendor/bin/phpunit tests/Integration/TempTest.php   # single file
-docker compose exec php ./vendor/bin/phpunit --filter testUnitIsWorking       # single test
+just install          # primeira vez: setup + up + composer install + migrate + criar admin
+just up | stop | status | logs
+just shell [serviço]  # sh dentro de um container (padrão: php)
+just migrate          # aplica as migrações no banco do app e no wecker_test
+just db-reset         # recria os dois bancos a partir das migrações (pede confirmação)
+just admin-create     # cria um admin (interativo)
+just test [filtro]    # PHPUnit
+just stan             # PHPStan (nível 6)
+just cs | cs-fix      # PHP-CS-Fixer (PER-CS 2.0)
 ```
 
-Note: there is no committed `phpunit.xml` — the test suite is currently a placeholder (`www/tests/Integration/TempTest.php`). The IDE points PHPUnit at `www/tests`.
+PHP e Composer rodam **dentro do container `php`** (PHP 8.5 no Ubuntu 24.04, código em `/var/www/html`). Migração nova = arquivo `.sql` numerado novo em `www/database/migrations/`; nunca edite uma que já rodou.
 
-## Detailed guidance
+## Antes de mexer no código
 
-Read the topic files under `.claude/rules/` before working in the corresponding area:
-
-- Backend architecture (request flow, layers, DI, Docker integration): @rules/architecture.md
-- PHP code style & conventions (naming, patterns, error handling): @rules/code-style.md
-- Frontend (Twig templates, jQuery page modules, DataTables/SweetAlert, JS↔API contracts): @rules/frontend.md
+- Convenções de código: @rules/code-style.md
+- Como cada parte funciona: `.claude/arch-explain/`, um arquivo por assunto, começando por `request-flow.md` (`di`, `auth`, `docker-client`, `error-handling`, `frontend`, `infra`, `testing`, `just`, `migrations`). Leia o do assunto antes de mexer nele, e atualize-o só quando a mudança invalidar o que está escrito.
+- Onde paramos, decisões e como o dev quer trabalhar: `.claude/handoff.md`. Próximos passos: roadmap do `README.md`.
 
 <!-- CODEGRAPH_START -->
 ## CodeGraph
 
-In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the repo root), reach for it BEFORE grep/find or reading files when you need to understand or locate code:
+Em repositórios indexados pelo CodeGraph (existe `.codegraph/` na raiz), use-o ANTES de grep/find ou de ler arquivos para entender ou localizar código:
 
-- **MCP tool** (when available): `codegraph_explore` answers most code questions in one call — the relevant symbols' verbatim source plus the call paths between them, including dynamic-dispatch hops grep can't follow. Name a file or symbol in the query to read its current line-numbered source. If it's listed but deferred, load it by name via tool search.
-- **Shell** (always works): `codegraph explore "<symbol names or question>"` prints the same output.
+- **Ferramenta MCP** (quando disponível): `codegraph_explore` responde a maioria das perguntas numa chamada: o código-fonte literal dos símbolos relevantes e os caminhos de chamada entre eles. Cite um arquivo ou símbolo na consulta para ler o código atual com número de linha. Se estiver listada como adiada, carregue-a pelo nome na busca de ferramentas.
+- **Shell** (sempre funciona): `codegraph explore "<símbolos ou pergunta>"` imprime o mesmo resultado.
 
-If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is the user's decision.
+Se não houver `.codegraph/`, ignore o CodeGraph: indexar é decisão do usuário.
 <!-- CODEGRAPH_END -->
