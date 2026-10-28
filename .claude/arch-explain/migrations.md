@@ -7,7 +7,7 @@ tabela, adicionar coluna, inserir dados fixos. O banco guarda quais migrações 
 programa (o *runner*) aplica só as que faltam, em ordem.
 
 O problema que isso resolve: antes, o schema vivia num `docs/database.sql` que cada pessoa
-carregava à mão uma vez. Quando o schema mudasse (os usuários da etapa 12, por exemplo), não
+carregava à mão uma vez. Quando o schema mudasse (uma coluna nova em `users`, por exemplo), não
 haveria como saber o que cada banco já tinha, e a saída seria apagar e recarregar, perdendo os
 dados. Com migrações, cada mudança vira um arquivo novo, e `just migrate` leva qualquer banco, novo
 ou antigo, até a versão atual.
@@ -52,7 +52,7 @@ A divisão segue o resto do projeto. O `public/index.php` é a porta de entrada 
 o app e entrega o pedido a um controller. Os arquivos de `bin/` são as portas de entrada **pelo
 terminal**: montam o container e entregam o trabalho a uma classe de `src/`. A lógica fica nas
 classes, que recebem as dependências por injeção, como os controllers e os services. Por isso dá
-para usar o `Migrator` também a partir dos testes (etapa 7), sem passar pelo terminal.
+para usar o `Migrator` também a partir dos testes (`tests/bootstrap.php`), sem passar pelo terminal.
 
 O `ConnectionFactory` é usado nos dois lados. O `config/database.php` pede a ele a conexão do app
 (`DB_NAME`), e o `Migrator` pede conexões para o banco `postgres` e para o `wecker_test`. A
@@ -121,14 +121,14 @@ migrate: (_running "php") _wait-db
     docker compose exec php php bin/migrate.php {{ test_db }}
 ```
 
-O `wecker_test` é o banco dos testes de integração (etapa 7). Migrar os dois juntos garante que os
+O `wecker_test` é o banco dos testes de integração. Migrar os dois juntos garante que os
 testes rodem sempre contra o schema atual. `just db-reset` faz o mesmo com `--fresh`, depois de
 pedir confirmação.
 
 ### Criar o admin: `admin-create.php`
 
 O schema não traz mais um usuário pronto. O `docs/database.sql` antigo vinha com
-`admin@admin.com` e uma senha conhecida (item 6 da análise do plano). Agora o admin é criado por
+`admin@admin.com` e uma senha conhecida, que qualquer um podia usar. Agora o admin é criado por
 você:
 
 ```

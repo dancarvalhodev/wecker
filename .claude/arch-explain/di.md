@@ -96,9 +96,8 @@ O `php-di/slim-bridge` (`Bridge::create($container)` em `AppFactory::create()`) 
 
 ## Pegadinhas
 
-- **Não faça `new` de um colaborador.** Se o `DashboardService` fizesse `new DockerClient()` (como
-  fazia até a etapa 7a), o `container->set()` do teste não teria efeito: o service ignoraria a peça
-  trocada. Receba pelo construtor.
+- **Não faça `new` de um colaborador.** Uma classe que faz `new DockerClient()` por conta própria
+  ignora o container: não dá para trocar a peça nem configurá-la num lugar só. Receba pelo construtor.
 - **Mesma instância na requisição.** `$container->get(X::class)` devolve sempre o mesmo objeto
   durante a requisição. Uma classe que guarda estado numa propriedade compartilha esse estado com
   todo mundo que a recebeu.

@@ -81,12 +81,10 @@ navegador, mas aponta para nada.
 
 - **O nome é `AuthMidleware`, com um `d` só.** Está assim em todo lugar; não corrija em um ponto só.
 - **A sessão guarda só o id.** Um usuário apagado do banco continua "logado" até a sessão expirar,
-  porque ninguém confere se o id ainda existe. A etapa 12 passa a recarregar o usuário a cada
-  requisição.
+  porque ninguém confere se o id ainda existe (o controle de usuários do roadmap resolve isso).
 - **Ninguém confere o papel.** Qualquer usuário logado faz tudo no dashboard, e o `UserRepo::hydrate()`
-  ainda monta todo usuário como `ROLE_USER` (etapa 12).
-- **Não há cadastro pela web.** O `/register` saiu na etapa 8; até a etapa 12, usuários só pelo
-  `just admin-create`.
+  ainda monta todo usuário como `ROLE_USER`.
+- **Não há cadastro pela web.** Usuários só pelo `just admin-create`.
 - **O erro do login chega no callback `error`.** O 422 não passa pelo `success` do `login.js`; a
   mensagem vem em `xhr.responseJSON.error`.
 - **CSRF via `SameSite=Strict`, sem token.** O `php.ini` marca o cookie de sessão como

@@ -28,7 +28,7 @@ PHP e Composer rodam **dentro do container `php`** (PHP 8.5 no Ubuntu 24.04, có
 
 - Convenções de código: @rules/code-style.md
 - Como cada parte funciona: `.claude/arch-explain/`, um arquivo por assunto, começando por `request-flow.md` (`di`, `auth`, `docker-client`, `error-handling`, `frontend`, `infra`, `testing`, `just`, `migrations`). Leia o do assunto antes de mexer nele, e atualize-o só quando a mudança invalidar o que está escrito.
-- Plano em execução: `.claude/plans/v2.md`; onde paramos: `.claude/handoff.md`.
+- Onde paramos, decisões e como o dev quer trabalhar: `.claude/handoff.md`. Próximos passos: roadmap do `README.md`.
 
 <!-- CODEGRAPH_START -->
 ## CodeGraph

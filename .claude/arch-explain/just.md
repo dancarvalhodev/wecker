@@ -6,7 +6,7 @@
 projeto e roda "receitas" pelo nome (`just up`, `just test`). Ele não compila nada nem guarda
 estado: é só um jeito organizado de dar nome a comandos que você digitaria no terminal.
 
-Substituiu o `run.sh` na etapa 3 do plano v2. O motivo: no bash, metade do arquivo era
+Substituiu o `run.sh` na v2. O motivo: no bash, metade do arquivo era
 infraestrutura (o `case`, o tratamento de argumentos, a tabela de ajuda). No `just`, isso vem
 pronto, e cada comando vira uma receita de duas ou três linhas.
 
